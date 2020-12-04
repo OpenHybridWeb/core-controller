@@ -50,6 +50,7 @@ public class WebsiteConfigService {
             config = loadYaml(is);
         }
         gatewayController.updateConfigSecret(config);
+        gatewayController.deploy();
     }
 
     public static WebsiteConfig loadYaml(InputStream is) {

@@ -10,6 +10,7 @@ import org.yaml.snakeyaml.Yaml;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,7 +18,6 @@ import java.util.Map;
 public class GatewayController {
 
     private static final Logger log = Logger.getLogger(GatewayController.class);
-
 
     static final String GATEWAY_CONFIG_NAME = "core-gateway-config";
 
@@ -42,7 +42,7 @@ public class GatewayController {
     public void updateConfigSecret(String secretData) {
         log.infof("Update config secret \n%s", secretData);
         Map<String, String> data = new HashMap<>();
-        data.put("static-content-config.yaml", secretData);
+        data.put("core-gateway-config.yaml", secretData);
 
         SecretBuilder gatewayConfig = new SecretBuilder()
                 .withMetadata(new ObjectMetaBuilder().withName(GATEWAY_CONFIG_NAME).build())
@@ -50,7 +50,11 @@ public class GatewayController {
         client.secrets().createOrReplace(gatewayConfig.build());
     }
 
-    public void deployGateway() {
+    public void deploy() {
+        InputStream gateway = GatewayController.class.getResourceAsStream("/k8s/core-gateway.yaml");
+        client.load(gateway).createOrReplace();
+
+        log.infof("core-gateway deployed");
     }
 
 }
