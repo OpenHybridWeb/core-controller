@@ -1,5 +1,6 @@
 package com.hybridweb.core.controller.website;
 
+import com.hybridweb.core.controller.gateway.GatewayController;
 import com.hybridweb.core.controller.website.model.WebsiteConfig;
 import io.quarkus.runtime.StartupEvent;
 import org.eclipse.jgit.api.Git;
@@ -11,6 +12,7 @@ import org.yaml.snakeyaml.constructor.Constructor;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
+import javax.inject.Inject;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -30,6 +32,9 @@ public class WebsiteConfigService {
 
     WebsiteConfig config;
 
+    @Inject
+    GatewayController gatewayController;
+
     void onStart(@Observes StartupEvent ev) throws GitAPIException, IOException {
         log.info("Initializing website config");
         File gitDir = new File(workDir + "/website.git");
@@ -44,6 +49,7 @@ public class WebsiteConfigService {
         try (InputStream is = new FileInputStream(gitDir.getAbsolutePath() + configPath)) {
             config = loadYaml(is);
         }
+        gatewayController.updateConfigSecret(config);
     }
 
     public static WebsiteConfig loadYaml(InputStream is) {

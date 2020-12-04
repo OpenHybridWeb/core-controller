@@ -13,6 +13,10 @@ public class ComponentConfig {
         this.context = context;
     }
 
+    public boolean isKindGit() {
+        return "git".equals(kind);
+    }
+
     public String getKind() {
         return kind;
     }

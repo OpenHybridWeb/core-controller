@@ -1,0 +1,16 @@
+apiVersion: 1
+defaults:
+  envs: [ dev, stage, prod ]
+
+components:
+  - context: /test-only-dev
+    kind: git
+    spec:
+      url: giturl1
+      dir: /
+      envs:
+        - dev: dev
+  - context: /test-minimal
+    kind: git
+    spec:
+      url: giturl2
