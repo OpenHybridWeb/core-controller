@@ -1,0 +1,65 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: core-controller
+  labels:
+    app: core-controller
+spec:
+  type: NodePort
+  ports:
+    - port: 8080
+  selector:
+    app: core-controller
+---
+apiVersion: apps/v1
+# TODO: Consider different type of k8s deployment which fits into controller
+kind: Deployment
+metadata:
+  name: core-controller
+spec:
+  selector:
+    matchLabels:
+      app: core-controller
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: core-controller
+    spec:
+      serviceAccountName: core-controller
+      containers:
+        - name: core-controller
+          image: "openhybridweb/core-controller:latest"
+          livenessProbe:
+            httpGet:
+              path: "/_api/health/live"
+              port: 8080
+            initialDelaySeconds: 5
+            failureThreshold: 10
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: "/_api/health/ready"
+              port: 8080
+            initialDelaySeconds: 5
+            failureThreshold: 5
+            periodSeconds: 5
+          resources:
+            requests:
+              cpu: 100m
+              memory: 100Mi
+          ports:
+            - containerPort: 8080
+          env:
+            - name: QUARKUS_KUBERNETES_CLIENT_TRUST_CERTS
+              value: "true"
+            - name: QUARKUS_KUBERNETES_CLIENT_NAMESPACE
+              value: "default"
+            - name: APP_CONTROLLER_WEBSITE_URL
+              value: "https://github.com/OpenHybridWeb/example-staticweb.git"
+          volumeMounts:
+            - mountPath: "/app/data/"
+              name: app-data
+      volumes:
+        - name: app-data
+          emptyDir: { }
