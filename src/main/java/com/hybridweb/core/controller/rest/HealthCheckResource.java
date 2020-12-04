@@ -1,0 +1,21 @@
+package com.hybridweb.core.controller.rest;
+
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+
+@Path("/_api/health/")
+public class HealthCheckResource {
+
+    @GET
+    @Path("live")
+    public String live() {
+        return "live";
+    }
+
+    @GET
+    @Path("ready")
+    public String ready() {
+        return "ready";
+    }
+
+}
