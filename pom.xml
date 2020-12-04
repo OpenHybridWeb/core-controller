@@ -35,6 +35,7 @@
 
         <quarkus.platform.version>1.10.2.Final</quarkus.platform.version>
         <snakeyaml.version>1.27</snakeyaml.version>
+        <jgit.version>5.8.0.202006091008-r</jgit.version>
 
         <!-- By default just do maven install and let github to do the deploy on release -->
         <release.goal>install</release.goal>
@@ -62,7 +63,13 @@
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-vertx-web</artifactId>
+            <artifactId>quarkus-resteasy-jackson</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.jgit</groupId>
+            <artifactId>org.eclipse.jgit</artifactId>
+            <version>${jgit.version}</version>
         </dependency>
 
         <dependency>
@@ -74,6 +81,11 @@
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-junit5</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-test-kubernetes-client</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

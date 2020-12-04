@@ -1,0 +1,18 @@
+apiVersion: 1
+defaults:
+  envs: [ dev, stage, prod ]
+
+components:
+  - context: /test1
+    kind: git
+    spec:
+      url: https://github.com/OpenHybridWeb/example-component-theme.git
+      dir: /
+      envs:                # Desired environments to deploy to. If missing then all envs are deployed with {env_name}={branch_name}
+        - dev: dev         # Each environment defines name of branch to checkout
+        - stage: stage
+        - prod: prod
+  - context: /test2
+    kind: git
+    spec:
+      url: https://github.com/OpenHybridWeb/example-component-homepage.git
