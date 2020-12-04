@@ -55,12 +55,8 @@ public class WebsiteConfigService {
     public static WebsiteConfig loadYaml(InputStream is) {
         Yaml yaml = new Yaml(new Constructor(WebsiteConfig.class));
         WebsiteConfig c = yaml.load(is);
-        log.infof("Loaded website.yaml content:\n%s", yaml.dump(c));
+        log.infof("Loaded website.yaml content:\n%s", yaml.dumpAsMap(c));
         return c;
-    }
-
-    public void validateConfig() {
-
     }
 
 

@@ -6,7 +6,6 @@ import io.fabric8.kubernetes.api.model.SecretBuilder;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
-import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -36,15 +35,12 @@ public class GatewayController {
 
     public void updateConfigSecret(WebsiteConfig websiteConfig) {
         GatewayConfig gatewayConfig = createGatewayConfig(websiteConfig);
-        final DumperOptions options = new DumperOptions();
-        options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
-        options.setPrettyFlow(true);
-        Yaml yaml = new Yaml(options);
-        String data= yaml.dump(gatewayConfig);
-        updateConfigSecret(data );
+        String data = new Yaml().dumpAsMap(gatewayConfig);
+        updateConfigSecret(data);
     }
 
     public void updateConfigSecret(String secretData) {
+        log.infof("Update config secret \n%s", secretData);
         Map<String, String> data = new HashMap<>();
         data.put("static-content-config.yaml", secretData);
 
