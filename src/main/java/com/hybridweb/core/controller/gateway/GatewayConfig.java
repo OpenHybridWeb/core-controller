@@ -9,10 +9,14 @@ public class GatewayConfig {
     public void addRoute(String context, String url) {
         routes.add(new Route(context, url));
     }
+    public void addRoute(String context, String url, String targetContext) {
+        routes.add(new Route(context, url, targetContext));
+    }
 
     public class Route {
         String context;
         String url;
+        String targetContext;
 
         public Route() {
         }
@@ -20,6 +24,11 @@ public class GatewayConfig {
         public Route(String context, String url) {
             this.context = context;
             this.url = url;
+        }
+
+        public Route(String context, String url, String targetContext) {
+            this(context, url);
+            this.targetContext = targetContext;
         }
 
         public String getContext() {
@@ -36,6 +45,14 @@ public class GatewayConfig {
 
         public void setUrl(String url) {
             this.url = url;
+        }
+
+        public String getTargetContext() {
+            return targetContext;
+        }
+
+        public void setTargetContext(String targetContext) {
+            this.targetContext = targetContext;
         }
     }
 

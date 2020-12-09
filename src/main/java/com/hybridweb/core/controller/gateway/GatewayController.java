@@ -4,6 +4,7 @@ import com.hybridweb.core.controller.website.model.WebsiteConfig;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.SecretBuilder;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
 import org.yaml.snakeyaml.Yaml;
@@ -24,12 +25,22 @@ public class GatewayController {
     @ConfigProperty(name = "app.staticcontent.url")
     protected String staticContentUrl;
 
+    @ConfigProperty(name = "app.staticcontent.rootcontext")
+    protected String rootContext;
+
     @Inject
     KubernetesClient client;
 
     public GatewayConfig createGatewayConfig(WebsiteConfig websiteConfig) {
         GatewayConfig gatewayConfig = new GatewayConfig();
-        websiteConfig.getComponents().forEach(c -> gatewayConfig.addRoute(c.getContext(), staticContentUrl));
+        websiteConfig.getComponents().forEach(c -> {
+            String routeContext = c.getContext() + "*";
+            if (StringUtils.equals("/", c.getContext())) {
+                gatewayConfig.addRoute(routeContext, staticContentUrl, rootContext);
+            } else {
+                gatewayConfig.addRoute(routeContext, staticContentUrl);
+            }
+        });
         return gatewayConfig;
     }
 

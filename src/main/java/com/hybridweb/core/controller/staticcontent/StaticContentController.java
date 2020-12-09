@@ -6,6 +6,7 @@ import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.SecretBuilder;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
 import org.yaml.snakeyaml.Yaml;
 
@@ -26,12 +27,18 @@ public class StaticContentController {
     @Inject
     KubernetesClient client;
 
+    @ConfigProperty(name = "app.staticcontent.rootcontext")
+    protected String rootContext;
 
     public StaticContentConfig createConfig(String env, WebsiteConfig websiteConfig) {
         StaticContentConfig config = new StaticContentConfig();
         websiteConfig.getComponents().forEach(c -> {
             if (c.getKind().equals("git")) {
-                String dir = StringUtils.defaultIfEmpty(c.getContext().substring(1), ".");
+                String dir = c.getContext();
+                if (StringUtils.equals("/", c.getContext())) {
+                    dir = rootContext;
+                }
+                dir = dir.substring(1);
                 ComponentSpec gitSpec = c.getSpec();
                 String gitDir = StringUtils.defaultIfEmpty(gitSpec.getDir(), "/");
                 config.addGitComponent(dir, c.getKind(), gitSpec.getUrl(), getRef(gitSpec.getEnvs(), env), gitDir);

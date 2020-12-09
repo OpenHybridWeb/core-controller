@@ -3,14 +3,19 @@ defaults:
   envs: [ dev, stage, prod ]
 
 components:
-  - context: /test-only-dev
+  - context: /test-only-dev/
     kind: git
     spec:
       url: giturl1
       dir: /
       envs:
         - dev: dev
-  - context: /test-minimal
+  - context: /test-minimal/
     kind: git
     spec:
       url: giturl2
+  # root
+  - context: /
+    kind: git
+    spec:
+      url: giturl3

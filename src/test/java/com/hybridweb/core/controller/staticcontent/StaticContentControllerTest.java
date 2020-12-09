@@ -20,6 +20,7 @@ class StaticContentControllerTest {
         String env = "test";
 
         StaticContentController controller = new StaticContentController();
+        controller.rootContext = "/_root_test/";
         StaticContentConfig config = controller.createConfig(env, websiteConfig);
 
         assertEquals(2, config.getComponents().size());
@@ -31,7 +32,7 @@ class StaticContentControllerTest {
         assertEquals("special-branch", component1.getSpec().getRef());
 
         StaticContentConfig.StaticComponent component2 = config.getComponents().get(1);
-        assertEquals(".", component2.getDir());
+        assertEquals("_root_test/", component2.getDir());
         assertEquals("git", component2.getKind());
         assertEquals("giturl2", component2.getSpec().getUrl());
         assertEquals("/", component2.getSpec().getDir());
