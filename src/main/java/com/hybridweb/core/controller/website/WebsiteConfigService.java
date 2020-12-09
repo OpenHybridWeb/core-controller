@@ -5,6 +5,7 @@ import com.hybridweb.core.controller.staticcontent.StaticContentController;
 import com.hybridweb.core.controller.website.model.WebsiteConfig;
 import io.quarkus.runtime.StartupEvent;
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.PullResult;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
@@ -45,7 +46,7 @@ public class WebsiteConfigService {
 
     void onStart(@Observes StartupEvent ev) throws GitAPIException, IOException {
         log.info("Initializing website config");
-        File gitDir = new File(workDir + "/website.git");
+        File gitDir = getGitDir();
         if (!gitDir.exists()) {
             try (Git git = Git.cloneRepository().setURI(gitUrl).setDirectory(gitDir).call()) {
                 String lastCommitMessage = git.log().call().iterator().next().getShortMessage();
@@ -65,6 +66,10 @@ public class WebsiteConfigService {
         gatewayController.deploy();
     }
 
+    public File getGitDir() {
+        return new File(workDir + "/website.git");
+    }
+
     public static WebsiteConfig loadYaml(InputStream is) {
         Yaml yaml = new Yaml(new Constructor(WebsiteConfig.class));
         WebsiteConfig c = yaml.load(is);
@@ -72,5 +77,24 @@ public class WebsiteConfigService {
         return c;
     }
 
+    public void redeploy() throws GitAPIException, IOException {
+        log.info("Redeploying website config");
+        File gitDir = getGitDir();
+        PullResult pullResult = Git.open(gitDir).pull().call();
+        if (!pullResult.isSuccessful()) {
+            throw new RuntimeException("Cannot pull repo. result=" + pullResult);
+        }
+        log.infof("Website config pulled in dir=%s commit_message='%s'", gitDir, pullResult.getFetchResult().getMessages());
+
+        try (InputStream is = new FileInputStream(gitDir.getAbsolutePath() + configPath)) {
+            config = loadYaml(is);
+        }
+        staticContentController.updateConfigSecret(env, config);
+        staticContentController.redeploy();
+        // TODO: Wait till deployment is ready
+
+        gatewayController.updateConfigSecret(env, config);
+        gatewayController.redeploy();
+    }
 
 }

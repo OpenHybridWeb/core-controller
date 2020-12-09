@@ -77,7 +77,12 @@ public class GatewayController {
         InputStream gateway = GatewayController.class.getResourceAsStream("/k8s/core-gateway.yaml");
         client.load(gateway).createOrReplace();
 
-        log.infof("core-gateway deployed");
+        log.info("core-gateway deployed");
+    }
+
+    public void redeploy() {
+        client.apps().deployments().withName("core-gateway").rolling().restart();
+        log.info("core-gateway redeployed");
     }
 
 }

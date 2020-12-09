@@ -88,7 +88,12 @@ public class StaticContentController {
         InputStream service = StaticContentController.class.getResourceAsStream("/k8s/core-staticcontent.yaml");
         client.load(service).createOrReplace();
 
-        log.infof("core-staticcontent deployed");
+        log.info("core-staticcontent deployed");
+    }
+
+    public void redeploy() {
+        client.apps().deployments().withName("core-staticcontent").rolling().restart();
+        log.info("core-staticcontent redeployed");
     }
 
 }
