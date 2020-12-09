@@ -7,13 +7,20 @@ import com.hybridweb.core.controller.website.model.WebsiteConfig;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.SecretBuilder;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import io.quarkus.runtime.StartupEvent;
+import io.vertx.core.Vertx;
+import io.vertx.core.http.HttpClient;
+import io.vertx.core.http.HttpClientOptions;
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
 import org.yaml.snakeyaml.Yaml;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Observes;
 import javax.inject.Inject;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
@@ -26,11 +33,26 @@ public class StaticContentController {
 
     static final String GATEWAY_CONFIG_NAME = "core-staticcontent-config";
 
+    static final String STATIC_CONTENT_API_HOST = "localhost";
+    static final int STATIC_CONTENT_API_PORT = 57846;
+
     @Inject
     KubernetesClient client;
 
+    @Inject
+    Vertx vertx;
+
+    HttpClient staticContentClient;
+
     @ConfigProperty(name = "app.staticcontent.rootcontext")
     protected String rootContext;
+
+    void onStart(@Observes StartupEvent ev) throws GitAPIException, IOException {
+        staticContentClient = vertx.createHttpClient(new HttpClientOptions()
+                .setDefaultPort(STATIC_CONTENT_API_PORT)
+                .setDefaultHost(STATIC_CONTENT_API_HOST)
+        );
+    }
 
     public StaticContentConfig createConfig(String targetEnv, WebsiteConfig websiteConfig) {
         StaticContentConfig config = new StaticContentConfig();
@@ -94,6 +116,16 @@ public class StaticContentController {
     public void redeploy() {
         client.apps().deployments().withName("core-staticcontent").rolling().restart();
         log.info("core-staticcontent redeployed");
+    }
+
+    public void refreshComponent(String name) {
+        staticContentClient.get("/_staticcontent/api/update/" + name).handler(ar -> {
+            if (ar.statusCode()  == 200) {
+                log.info("core-staticcontent refreshed");
+            } else {
+                log.infof("core-staticcontent cannot refresh error=%s", ar.statusMessage());
+            }
+        }).end();
     }
 
 }
