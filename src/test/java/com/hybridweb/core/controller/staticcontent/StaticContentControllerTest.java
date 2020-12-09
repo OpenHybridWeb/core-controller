@@ -37,7 +37,20 @@ class StaticContentControllerTest {
         assertEquals("giturl2", component2.getSpec().getUrl());
         assertEquals("/", component2.getSpec().getDir());
         assertEquals(env, component2.getSpec().getRef());
+    }
 
+    @Test
+    void createConfigInvalidEnv() throws IOException {
+        InputStream is = StaticContentControllerTest.class.getResourceAsStream("/staticcontent-website-test.yaml");
+        WebsiteConfig websiteConfig = WebsiteConfigService.loadYaml(is);
+        is.close();
 
+        String env = "invalid";
+
+        StaticContentController controller = new StaticContentController();
+        controller.rootContext = "/_root_test/";
+        StaticContentConfig config = controller.createConfig(env, websiteConfig);
+
+        assertEquals(0, config.getComponents().size());
     }
 }

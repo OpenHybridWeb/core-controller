@@ -1,5 +1,7 @@
 package com.hybridweb.core.controller.staticcontent;
 
+import com.hybridweb.core.controller.Utils;
+import com.hybridweb.core.controller.website.model.ComponentConfig;
 import com.hybridweb.core.controller.website.model.ComponentSpec;
 import com.hybridweb.core.controller.website.model.WebsiteConfig;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
@@ -30,26 +32,34 @@ public class StaticContentController {
     @ConfigProperty(name = "app.staticcontent.rootcontext")
     protected String rootContext;
 
-    public StaticContentConfig createConfig(String env, WebsiteConfig websiteConfig) {
+    public StaticContentConfig createConfig(String targetEnv, WebsiteConfig websiteConfig) {
         StaticContentConfig config = new StaticContentConfig();
-        websiteConfig.getComponents().forEach(c -> {
+        if (!Utils.isEnvEnabled(websiteConfig.getDefaults(), targetEnv)) {
+            return config;
+        }
+        for (ComponentConfig c : websiteConfig.getComponents()) {
+            ComponentSpec spec = c.getSpec();
+            List<Map<String, Object>> envs = spec.getEnvs();
+            if (!Utils.isEnvIncluded(envs, targetEnv)) {
+                continue;
+            }
+
             if (c.getKind().equals("git")) {
                 String dir = c.getContext();
                 if (StringUtils.equals("/", c.getContext())) {
                     dir = rootContext;
                 }
-                dir = dir.substring(1);
-                ComponentSpec gitSpec = c.getSpec();
-                String gitDir = StringUtils.defaultIfEmpty(gitSpec.getDir(), "/");
-                config.addGitComponent(dir, c.getKind(), gitSpec.getUrl(), getRef(gitSpec.getEnvs(), env), gitDir);
+                dir = dir.substring(1); // remove starting "/"
+                String gitDir = StringUtils.defaultIfEmpty(spec.getDir(), "/");
+                config.addGitComponent(dir, c.getKind(), spec.getUrl(), getRef(envs, targetEnv), gitDir);
             }
-        });
+        }
         return config;
     }
 
     public String getRef(List<Map<String, Object>> envs, String targetEnv) {
         if (envs == null) {
-            return  targetEnv;
+            return targetEnv;
         }
         for (Map<String, Object> env : envs) {
             return (String) env.get(targetEnv);

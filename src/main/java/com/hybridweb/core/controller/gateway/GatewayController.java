@@ -1,5 +1,8 @@
 package com.hybridweb.core.controller.gateway;
 
+import com.hybridweb.core.controller.Utils;
+import com.hybridweb.core.controller.website.model.ComponentConfig;
+import com.hybridweb.core.controller.website.model.ComponentSpec;
 import com.hybridweb.core.controller.website.model.WebsiteConfig;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.SecretBuilder;
@@ -13,6 +16,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @ApplicationScoped
@@ -31,21 +35,29 @@ public class GatewayController {
     @Inject
     KubernetesClient client;
 
-    public GatewayConfig createGatewayConfig(WebsiteConfig websiteConfig) {
-        GatewayConfig gatewayConfig = new GatewayConfig();
-        websiteConfig.getComponents().forEach(c -> {
+    public GatewayConfig createGatewayConfig(String targetEnv, WebsiteConfig websiteConfig) {
+        GatewayConfig config = new GatewayConfig();
+        if (!Utils.isEnvEnabled(websiteConfig.getDefaults(), targetEnv)) {
+            return config;
+        }
+        for (ComponentConfig c : websiteConfig.getComponents()) {
+            ComponentSpec spec = c.getSpec();
+            List<Map<String, Object>> envs = spec.getEnvs();
+            if (!Utils.isEnvIncluded(envs, targetEnv)) {
+                continue;
+            }
             String routeContext = c.getContext() + "*";
             if (StringUtils.equals("/", c.getContext())) {
-                gatewayConfig.addRoute(routeContext, staticContentUrl, rootContext);
+                config.addRoute(routeContext, staticContentUrl, rootContext);
             } else {
-                gatewayConfig.addRoute(routeContext, staticContentUrl);
+                config.addRoute(routeContext, staticContentUrl);
             }
-        });
-        return gatewayConfig;
+        }
+        return config;
     }
 
     public void updateConfigSecret(String env, WebsiteConfig websiteConfig) {
-        GatewayConfig gatewayConfig = createGatewayConfig(websiteConfig);
+        GatewayConfig gatewayConfig = createGatewayConfig(env, websiteConfig);
         String data = new Yaml().dumpAsMap(gatewayConfig);
         updateConfigSecret(data);
     }

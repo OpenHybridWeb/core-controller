@@ -1,6 +1,6 @@
 apiVersion: 1
 defaults:
-  envs: [ test, dev, stage, prod ]
+  envs: [ test, prod ]
 
 components:
   - context: /test-only-dev
@@ -10,6 +10,13 @@ components:
       dir: /subidr
       envs:
         - test: special-branch
+  # should be ignored in test env
+  - context: /test-ignored
+    kind: git
+    spec:
+      url: giturl2
+      envs:
+        - prod: onlyprodbranch
   # homepage
   - context: /
     kind: git

@@ -18,11 +18,12 @@ class GatewayControllerTest {
         is.close();
 
         String staticContentUrl = "http://sc";
+        String env = "test";
 
         GatewayController gatewayController= new GatewayController();
         gatewayController.staticContentUrl = staticContentUrl;
         gatewayController.rootContext = "/_test_root/";
-        GatewayConfig config = gatewayController.createGatewayConfig(websiteConfig);
+        GatewayConfig config = gatewayController.createGatewayConfig(env, websiteConfig);
 
         assertEquals(3, config.getRoutes().size());
         GatewayConfig.Route route1 = config.getRoutes().get(0);
@@ -37,6 +38,22 @@ class GatewayControllerTest {
         assertEquals("/*", route3.getContext());
         assertEquals("/_test_root/", route3.getTargetContext());
         assertEquals(staticContentUrl, route2.getUrl());
+    }
 
+    @Test
+    void createGatewayConfigInvalidEnv() throws IOException {
+        InputStream is = GatewayControllerTest.class.getResourceAsStream("/gateway-website-test.yaml");
+        WebsiteConfig websiteConfig = WebsiteConfigService.loadYaml(is);
+        is.close();
+
+        String staticContentUrl = "http://sc";
+        String env = "invalid";
+
+        GatewayController gatewayController= new GatewayController();
+        gatewayController.staticContentUrl = staticContentUrl;
+        gatewayController.rootContext = "/_test_root/";
+        GatewayConfig config = gatewayController.createGatewayConfig(env, websiteConfig);
+
+        assertEquals(0, config.getRoutes().size());
     }
 }
