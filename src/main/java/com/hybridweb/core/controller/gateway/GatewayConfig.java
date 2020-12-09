@@ -1,10 +1,10 @@
 package com.hybridweb.core.controller.gateway;
 
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 public class GatewayConfig {
-    List<Route> routes = new ArrayList<>();
+    List<Route> routes = new LinkedList<>();
 
     public void addRoute(String context, String url) {
         routes.add(new Route(context, url));

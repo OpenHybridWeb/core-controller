@@ -55,6 +55,8 @@ spec:
               value: "true"
             - name: QUARKUS_KUBERNETES_CLIENT_NAMESPACE
               value: "default"
+            - name: APP_CONTROLLER_ENV
+              value: "dev"
             - name: APP_CONTROLLER_WEBSITE_URL
               value: "https://github.com/OpenHybridWeb/example-staticweb.git"
           volumeMounts:

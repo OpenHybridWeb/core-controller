@@ -33,7 +33,7 @@ public class GatewayController {
         return gatewayConfig;
     }
 
-    public void updateConfigSecret(WebsiteConfig websiteConfig) {
+    public void updateConfigSecret(String env, WebsiteConfig websiteConfig) {
         GatewayConfig gatewayConfig = createGatewayConfig(websiteConfig);
         String data = new Yaml().dumpAsMap(gatewayConfig);
         updateConfigSecret(data);

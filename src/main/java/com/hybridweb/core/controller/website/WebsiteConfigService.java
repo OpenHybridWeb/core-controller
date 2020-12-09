@@ -1,6 +1,7 @@
 package com.hybridweb.core.controller.website;
 
 import com.hybridweb.core.controller.gateway.GatewayController;
+import com.hybridweb.core.controller.staticcontent.StaticContentController;
 import com.hybridweb.core.controller.website.model.WebsiteConfig;
 import io.quarkus.runtime.StartupEvent;
 import org.eclipse.jgit.api.Git;
@@ -26,6 +27,9 @@ public class WebsiteConfigService {
     @ConfigProperty(name = "app.controller.website.url")
     String gitUrl;
 
+    @ConfigProperty(name = "app.controller.env")
+    protected String env;
+
     String workDir = System.getProperty("user.dir");
 
     String configPath = "/.openhybridweb/website.yaml";
@@ -34,6 +38,10 @@ public class WebsiteConfigService {
 
     @Inject
     GatewayController gatewayController;
+
+    @Inject
+    StaticContentController staticContentController;
+
 
     void onStart(@Observes StartupEvent ev) throws GitAPIException, IOException {
         log.info("Initializing website config");
@@ -49,7 +57,11 @@ public class WebsiteConfigService {
         try (InputStream is = new FileInputStream(gitDir.getAbsolutePath() + configPath)) {
             config = loadYaml(is);
         }
-        gatewayController.updateConfigSecret(config);
+        staticContentController.updateConfigSecret(env, config);
+        staticContentController.deploy();
+        // TODO: Wait till deployment is ready
+
+        gatewayController.updateConfigSecret(env, config);
         gatewayController.deploy();
     }
 
