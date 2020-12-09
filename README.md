@@ -4,6 +4,14 @@ Core component to control gateway and staticcontent containers.
 Env variable pointing to git repo is `APP_CONTROLLER_WEBSITE_URL`.
 Default value is `https://github.com/OpenHybridWeb/example-staticweb.git`
 
+## REST API
+
+* /health/live
+* /health/ready
+* /_controller/api/github/website
+* /_controller/api/github/component/{name}
+
+
 ## How to run
 
 ### Minikube

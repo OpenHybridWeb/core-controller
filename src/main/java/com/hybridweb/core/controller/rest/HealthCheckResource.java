@@ -3,7 +3,7 @@ package com.hybridweb.core.controller.rest;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 
-@Path("/_api/health/")
+@Path("/health/")
 public class HealthCheckResource {
 
     @GET
