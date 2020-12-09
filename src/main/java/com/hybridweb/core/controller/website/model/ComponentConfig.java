@@ -16,6 +16,9 @@ public class ComponentConfig {
     public boolean isKindGit() {
         return "git".equals(kind);
     }
+    public boolean isKindService() {
+        return "service".equals(kind);
+    }
 
     public String getKind() {
         return kind;

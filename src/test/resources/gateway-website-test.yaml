@@ -20,6 +20,10 @@ components:
     kind: git
     spec:
       url: giturl2
+  - context: /_api/
+    kind: service
+    spec:
+      url: http://core-controller:8080
   # root
   - context: /
     kind: git
