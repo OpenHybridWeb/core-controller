@@ -34,14 +34,14 @@ spec:
           image: "openhybridweb/core-gateway:latest"
           livenessProbe:
             httpGet:
-              path: "/_api/health/live"
+              path: "/_gateway/api/health/live"
               port: 8080
             initialDelaySeconds: 5
             failureThreshold: 10
             periodSeconds: 5
           readinessProbe:
             httpGet:
-              path: "/_api/health/ready"
+              path: "/_gateway/api/health/ready"
               port: 8080
             initialDelaySeconds: 5
             failureThreshold: 5
