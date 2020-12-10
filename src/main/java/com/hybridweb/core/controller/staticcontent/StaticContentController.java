@@ -6,7 +6,7 @@ import com.hybridweb.core.controller.website.model.ComponentSpec;
 import com.hybridweb.core.controller.website.model.WebsiteConfig;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.SecretBuilder;
-import io.fabric8.kubernetes.client.KubernetesClient;
+import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.quarkus.runtime.StartupEvent;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
@@ -37,7 +37,7 @@ public class StaticContentController {
     static final int STATIC_CONTENT_API_PORT = 57846;
 
     @Inject
-    KubernetesClient client;
+    DefaultKubernetesClient client;
 
     @Inject
     Vertx vertx;
@@ -106,15 +106,15 @@ public class StaticContentController {
         client.secrets().createOrReplace(config.build());
     }
 
-    public void deploy() {
+    public void deploy(String namespace) {
         InputStream service = StaticContentController.class.getResourceAsStream("/k8s/core-staticcontent.yaml");
-        client.load(service).createOrReplace();
+        client.inNamespace(namespace).load(service).createOrReplace();
 
         log.info("core-staticcontent deployed");
     }
 
-    public void redeploy() {
-        client.apps().deployments().withName("core-staticcontent").rolling().restart();
+    public void redeploy(String namespace) {
+        client.inNamespace(namespace).apps().deployments().withName("core-staticcontent").rolling().restart();
         log.info("core-staticcontent redeployed");
     }
 

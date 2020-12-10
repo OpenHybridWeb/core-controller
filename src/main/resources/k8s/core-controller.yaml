@@ -50,12 +50,6 @@ spec:
               memory: 100Mi
           ports:
             - containerPort: 8080
-          env:
-            - name: QUARKUS_KUBERNETES_CLIENT_TRUST_CERTS
-              value: "true"
-            - name: QUARKUS_KUBERNETES_CLIENT_NAMESPACE
-              value: "default"
-#            - name: APP_CONTROLLER_ENV
-#              value: "dev"
-            - name: APP_CONTROLLER_WEBSITE_URL
-              value: "https://github.com/OpenHybridWeb/example-staticweb.git"
+          envFrom:
+            - configMapRef:
+                name: "core-controller-config"

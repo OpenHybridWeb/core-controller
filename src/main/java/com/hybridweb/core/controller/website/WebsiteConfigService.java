@@ -19,6 +19,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Optional;
 
 @ApplicationScoped
 public class WebsiteConfigService {
@@ -29,7 +30,7 @@ public class WebsiteConfigService {
     String gitUrl;
 
     @ConfigProperty(name = "app.controller.env")
-    protected String env;
+    protected Optional<String> env;
 
     String workDir = System.getProperty("user.dir");
 
@@ -59,11 +60,14 @@ public class WebsiteConfigService {
         }
 
         List<String> envs = config.getDefaults().getEnvs();
-        if (!envs.contains(env)) {
-            log.info("desired env %s is not on the list. Going to create appropriate namespaces");
+        if (env.isEmpty() || !envs.contains(env.get())) {
+            log.infof("desired env %s is not on the list. Going to create appropriate namespaces", env.orElse(""));
             mainController.createNamespaces(envs);
+            for (String e : envs) {
+                mainController.deployController(e, gitUrl);
+            }
         } else {
-            mainController.deploy(env, config);
+            mainController.deploy(env.get(), config);
         }
     }
 
@@ -91,7 +95,7 @@ public class WebsiteConfigService {
         }
 
         // TODO: Check if any change happens. If not skip redeploy
-        mainController.redeploy(env, config);
+        mainController.redeploy(env.get(), config);
 
     }
 }

@@ -6,7 +6,7 @@ import com.hybridweb.core.controller.website.model.ComponentSpec;
 import com.hybridweb.core.controller.website.model.WebsiteConfig;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.SecretBuilder;
-import io.fabric8.kubernetes.client.KubernetesClient;
+import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
@@ -33,7 +33,7 @@ public class GatewayController {
     protected String rootContext;
 
     @Inject
-    KubernetesClient client;
+    DefaultKubernetesClient client;
 
     public GatewayConfig createGatewayConfig(String targetEnv, WebsiteConfig websiteConfig) {
         GatewayConfig config = new GatewayConfig();
@@ -81,15 +81,15 @@ public class GatewayController {
         client.secrets().createOrReplace(gatewayConfig.build());
     }
 
-    public void deploy() {
+    public void deploy(String namespace) {
         InputStream gateway = GatewayController.class.getResourceAsStream("/k8s/core-gateway.yaml");
-        client.load(gateway).createOrReplace();
+        client.inNamespace(namespace).load(gateway).createOrReplace();
 
         log.info("core-gateway deployed");
     }
 
-    public void redeploy() {
-        client.apps().deployments().withName("core-gateway").rolling().restart();
+    public void redeploy(String namespace) {
+        client.inNamespace(namespace).apps().deployments().withName("core-gateway").rolling().restart();
         log.info("core-gateway redeployed");
     }
 
