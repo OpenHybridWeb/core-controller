@@ -19,6 +19,11 @@ public class GithubHookResource {
     @Inject
     StaticContentController staticContentController;
 
+    @GET
+    @Path("")
+    public String root() throws GitAPIException, IOException {
+        return "Github API";
+    }
 
     @GET
     @Path("website")
