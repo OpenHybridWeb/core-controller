@@ -34,16 +34,16 @@ spec:
             httpGet:
               path: "/health/live"
               port: 8080
-            initialDelaySeconds: 5
+            initialDelaySeconds: 20
             failureThreshold: 10
-            periodSeconds: 5
+            periodSeconds: 10
           readinessProbe:
             httpGet:
               path: "/health/ready"
               port: 8080
-            initialDelaySeconds: 5
+            initialDelaySeconds: 20
             failureThreshold: 5
-            periodSeconds: 5
+            periodSeconds: 10
           resources:
             requests:
               cpu: 100m
