@@ -28,7 +28,7 @@ public class GithubHookResource {
     @GET
     @Path("website")
     public String websiteHook() throws GitAPIException, IOException {
-        websiteConfigService.redeploy();
+        websiteConfigService.reload();
         return "DONE";
     }
 

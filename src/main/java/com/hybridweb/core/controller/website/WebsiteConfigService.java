@@ -1,7 +1,6 @@
 package com.hybridweb.core.controller.website;
 
-import com.hybridweb.core.controller.gateway.GatewayController;
-import com.hybridweb.core.controller.staticcontent.StaticContentController;
+import com.hybridweb.core.controller.MainController;
 import com.hybridweb.core.controller.website.model.WebsiteConfig;
 import io.quarkus.runtime.StartupEvent;
 import org.eclipse.jgit.api.Git;
@@ -19,6 +18,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
 @ApplicationScoped
 public class WebsiteConfigService {
@@ -37,11 +37,10 @@ public class WebsiteConfigService {
 
     WebsiteConfig config;
 
-    @Inject
-    GatewayController gatewayController;
 
     @Inject
-    StaticContentController staticContentController;
+    public
+    MainController mainController;
 
 
     void onStart(@Observes StartupEvent ev) throws GitAPIException, IOException {
@@ -58,12 +57,14 @@ public class WebsiteConfigService {
         try (InputStream is = new FileInputStream(gitDir.getAbsolutePath() + configPath)) {
             config = loadYaml(is);
         }
-        staticContentController.updateConfigSecret(env, config);
-        staticContentController.deploy();
-        // TODO: Wait till deployment is ready
 
-        gatewayController.updateConfigSecret(env, config);
-        gatewayController.deploy();
+        List<String> envs = config.getDefaults().getEnvs();
+        if (!envs.contains(env)) {
+            log.info("desired env %s is not on the list. Going to create appropriate namespaces");
+            mainController.createNamespaces(envs);
+        } else {
+            mainController.deploy(env, config);
+        }
     }
 
     public File getGitDir() {
@@ -77,8 +78,7 @@ public class WebsiteConfigService {
         return c;
     }
 
-    public void redeploy() throws GitAPIException, IOException {
-        log.info("Redeploying website config");
+    public void reload() throws GitAPIException, IOException {
         File gitDir = getGitDir();
         PullResult pullResult = Git.open(gitDir).pull().call();
         if (!pullResult.isSuccessful()) {
@@ -87,14 +87,11 @@ public class WebsiteConfigService {
         log.infof("Website config pulled in dir=%s commit_message='%s'", gitDir, pullResult.getFetchResult().getMessages());
 
         try (InputStream is = new FileInputStream(gitDir.getAbsolutePath() + configPath)) {
-            config = loadYaml(is);
+            config = WebsiteConfigService.loadYaml(is);
         }
-        staticContentController.updateConfigSecret(env, config);
-        staticContentController.redeploy();
-        // TODO: Wait till deployment is ready
 
-        gatewayController.updateConfigSecret(env, config);
-        gatewayController.redeploy();
+        // TODO: Check if any change happens. If not skip redeploy
+        mainController.redeploy(env, config);
+
     }
-
 }
