@@ -50,23 +50,25 @@ public class MainController {
         return namespacePrefix + env;
     }
 
-    public void deployController(String env, String gitUrl) {
+    public void deployController(String env, String gitUrl, String configDir, String configFilename) {
         InputStream service = StaticContentController.class.getResourceAsStream("/k8s/core-controller.yaml");
         String namespace = getNameSpaceName(env);
 
         updateServiceAccount(env);
-        updateControllerConfig(env, gitUrl);
+        updateControllerConfig(env, gitUrl, configDir, configFilename);
 
         client.inNamespace(namespace).load(service).createOrReplace();
         log.infof("Controller created in namespace=%s", namespace);
     }
 
-    public void updateControllerConfig(String env, String gitUrl) {
+    public void updateControllerConfig(String env, String gitUrl, String configDir, String configFilename) {
         String namespace = getNameSpaceName(env);
 
         log.infof("Update core-controller-config namespace=%s", namespace);
         Map<String, String> data = new HashMap<>();
         data.put("APP_CONTROLLER_ENV", env);
+        data.put("APP_CONTROLLER_WEBSITE_CONFIG_DIR", configDir);
+        data.put("APP_CONTROLLER_WEBSITE_CONFIG_FILENAME", configFilename);
         data.put("APP_CONTROLLER_WEBSITE_URL", gitUrl);
 
         ConfigMapBuilder configMap = new ConfigMapBuilder()

@@ -67,7 +67,7 @@ public class WebsiteConfigService {
             log.infof("desired env %s is not on the list. Going to create appropriate namespaces", env.orElse(""));
             mainController.createNamespaces(envs);
             for (String e : envs) {
-                mainController.deployController(e, gitUrl);
+                mainController.deployController(e, gitUrl, configDir, configFilename);
             }
         } else {
             mainController.deploy(env.get(), config);
