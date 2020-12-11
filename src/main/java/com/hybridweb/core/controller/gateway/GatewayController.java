@@ -71,7 +71,7 @@ public class GatewayController {
     }
 
     public void updateConfigSecret(String namespace, String secretData) {
-        log.infof("Update config secret \n%s", secretData);
+        log.infof("Update core-gateway-config secret in namespace=%s\n%s", namespace, secretData);
         Map<String, String> data = new HashMap<>();
         data.put("core-gateway-config.yaml", secretData);
 

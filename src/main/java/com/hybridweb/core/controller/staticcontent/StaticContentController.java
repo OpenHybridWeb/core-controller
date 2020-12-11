@@ -96,7 +96,7 @@ public class StaticContentController {
     }
 
     public void updateConfigSecret(String namespace, String secretData) {
-        log.infof("Update core-staticcontent-config secret \n%s", secretData);
+        log.infof("Update core-staticcontent-config secret in namespace=%s\n%s", namespace, secretData);
         Map<String, String> data = new HashMap<>();
         data.put("core-staticcontent-config.yaml", secretData);
 

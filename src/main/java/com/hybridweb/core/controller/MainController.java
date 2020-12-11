@@ -66,8 +66,6 @@ public class MainController {
 
         log.infof("Update core-controller-config namespace=%s", namespace);
         Map<String, String> data = new HashMap<>();
-        data.put("QUARKUS_KUBERNETES_CLIENT_TRUST_CERTS", "true");
-        data.put("QUARKUS_KUBERNETES_CLIENT_NAMESPACE", namespace);
         data.put("APP_CONTROLLER_ENV", env);
         data.put("APP_CONTROLLER_WEBSITE_URL", gitUrl);
 
@@ -115,9 +113,9 @@ public class MainController {
     }
 
     public void deploy(String env, WebsiteConfig config) {
-        log.infof("Deploying website config, env=%s", env);
-
         String namespace = getNameSpaceName(env);
+        log.infof("Deploying website config, env=%s namespace=%s", env, namespace);
+
         staticContentController.updateConfigSecret(env, namespace, config);
         staticContentController.deploy(namespace);
         // TODO: Wait till deployment is ready

@@ -21,17 +21,22 @@ Start minikube
 minikube start
 ```
 
-Service account and Deploy
+Namespace
 ```shell
-kubectl apply -f src/main/k8s/service-account.yaml
-kubectl apply -f src/main/k8s/core-controller.yaml
+kubectl create namespace web-dev
+```
+
+Service account, configmap and Deploy
+```shell
+kubectl -n web-dev apply -f src/main/k8s/service-account.yaml
+kubectl -n web-dev create configmap core-controller-config --from-literal=APP_CONTROLLER_ENV=dev --from-literal=APP_CONTROLLER_WEBSITE_URL=https://github.com/OpenHybridWeb/example-staticweb.git
+kubectl -n web-dev apply -f src/main/k8s/core-controller.yaml
 ```
 
 You're done. Expose the gateway via
 ```shell
-minikube service core-gateway
+minikube -n web-dev service core-gateway
 ```
-and hit 
 
 See the result in dashboard
 
@@ -40,11 +45,11 @@ minikube dashboard
 ```
 
 
-#### Local Development
+### Local Development
 
-To run as locally do not deploy docker image via `kubectl apply -f src/main/k8s/core-controller.yaml`
-and just expose minikube api to port 8090
+Just create a namespace and expose minikube api to port 8090
 ```shell
+kubectl create namespace web-dev
 kubectl proxy --port=8090
 ```
 
@@ -52,13 +57,18 @@ Run controller on your JVM which by defaults set
 ```
 app.controller.website.url=https://github.com/OpenHybridWeb/example-staticweb.git
 app.controller.env=dev
-quarkus.kubernetes-client.namespace=web-dev
 ```
 
 ```shell
-kubectl create namespace web-dev
 mvn compile
 mvn quarkus:dev
+```
+
+To deploy the controller as "operator" which creates appropriate namespaces and deploy in each of them configured controller
+
+```shell
+mvn clean package
+APP_CONTROLLER_WEBSITE_URL=https://github.com/OpenHybridWeb/example-staticweb.git java -jar target/controller-1.0.0-SNAPSHOT-runner.jar
 ```
 
 #### Cleanup
