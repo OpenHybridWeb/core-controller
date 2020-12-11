@@ -55,7 +55,7 @@ kubectl proxy --port=8090
 Run controller on your JVM which by defaults set 
 ```
 app.controller.website.url=https://github.com/OpenHybridWeb/example-websites.git
-app.controller.website.config.dir=static
+app.controller.website.config.dir=static-restapi
 app.controller.env=dev
 ```
 
