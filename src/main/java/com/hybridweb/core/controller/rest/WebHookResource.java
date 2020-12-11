@@ -2,6 +2,8 @@ package com.hybridweb.core.controller.rest;
 
 import com.hybridweb.core.controller.staticcontent.StaticContentController;
 import com.hybridweb.core.controller.website.WebsiteConfigService;
+import io.smallrye.mutiny.Uni;
+import io.vertx.core.json.JsonObject;
 import org.eclipse.jgit.api.errors.GitAPIException;
 
 import javax.inject.Inject;
@@ -44,9 +46,8 @@ public class WebHookResource {
 
     @GET
     @Path("component/{name}")
-    public String componentHook(@PathParam("name") String name) throws GitAPIException, IOException {
-        staticContentController.refreshComponent(name);
-        return "DONE";
+    public Uni<JsonObject> componentHook(@PathParam("name") String name) {
+        return staticContentController.refreshComponent(name);
     }
 
 

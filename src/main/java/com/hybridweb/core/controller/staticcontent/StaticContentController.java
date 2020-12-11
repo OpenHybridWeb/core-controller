@@ -8,11 +8,12 @@ import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.SecretBuilder;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.quarkus.runtime.StartupEvent;
-import io.vertx.core.Vertx;
-import io.vertx.core.http.HttpClient;
-import io.vertx.core.http.HttpClientOptions;
+import io.smallrye.mutiny.Uni;
+import io.vertx.core.json.JsonObject;
+import io.vertx.ext.web.client.WebClientOptions;
+import io.vertx.mutiny.core.Vertx;
+import io.vertx.mutiny.ext.web.client.WebClient;
 import org.apache.commons.lang3.StringUtils;
-import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
 import org.yaml.snakeyaml.Yaml;
@@ -20,7 +21,6 @@ import org.yaml.snakeyaml.Yaml;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
@@ -33,25 +33,28 @@ public class StaticContentController {
 
     static final String GATEWAY_CONFIG_NAME = "core-staticcontent-config";
 
-    static final String STATIC_CONTENT_API_HOST = "localhost";
-    static final int STATIC_CONTENT_API_PORT = 57846;
-
     @Inject
     DefaultKubernetesClient client;
 
     @Inject
     Vertx vertx;
 
-    HttpClient staticContentClient;
+    WebClient staticContentClient;
+
+    @ConfigProperty(name = "app.staticcontent.api.host")
+    protected String staticContentUrl;
+
+    @ConfigProperty(name = "app.staticcontent.api.port")
+    int staticContentApiPort;
 
     @ConfigProperty(name = "app.staticcontent.rootcontext")
     protected String rootContext;
 
-    void onStart(@Observes StartupEvent ev) throws GitAPIException, IOException {
-        staticContentClient = vertx.createHttpClient(new HttpClientOptions()
-                .setDefaultPort(STATIC_CONTENT_API_PORT)
-                .setDefaultHost(STATIC_CONTENT_API_HOST)
-        );
+    void onStart(@Observes StartupEvent ev){
+        this.staticContentClient = WebClient.create(vertx, new WebClientOptions()
+                .setDefaultHost(staticContentUrl)
+                .setDefaultPort(staticContentApiPort)
+                .setTrustAll(true));
     }
 
     public StaticContentConfig createConfig(String targetEnv, WebsiteConfig websiteConfig) {
@@ -118,14 +121,17 @@ public class StaticContentController {
         log.info("core-staticcontent redeployed");
     }
 
-    public void refreshComponent(String name) {
-        staticContentClient.get("/_staticcontent/api/update/" + name).handler(ar -> {
-            if (ar.statusCode()  == 200) {
-                log.info("core-staticcontent refreshed");
+    public Uni<JsonObject> refreshComponent(String name) {
+        log.infof("Refresh component name=%s", name);
+        return staticContentClient.get("/_staticcontent/api/update/" + name).send().map(resp -> {
+            if (resp.statusCode() == 200) {
+                return resp.bodyAsJsonObject();
             } else {
-                log.infof("core-staticcontent cannot refresh error=%s", ar.statusMessage());
+                return new JsonObject()
+                        .put("code", resp.statusCode())
+                        .put("message", resp.bodyAsString());
             }
-        }).end();
+        });
     }
 
 }
