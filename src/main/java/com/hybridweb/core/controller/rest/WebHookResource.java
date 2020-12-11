@@ -5,13 +5,18 @@ import com.hybridweb.core.controller.website.WebsiteConfigService;
 import org.eclipse.jgit.api.errors.GitAPIException;
 
 import javax.inject.Inject;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
-@Path("/_controller/api/github/")
-public class GithubHookResource {
+@Path("/_controller/api/webhook/")
+@Consumes(MediaType.APPLICATION_JSON)
+@Produces(MediaType.APPLICATION_JSON)
+public class WebHookResource {
+
+    public static final String CONTEXT = "/_controller/api/webhook/";
 
     @Inject
     WebsiteConfigService websiteConfigService;
@@ -21,13 +26,18 @@ public class GithubHookResource {
 
     @GET
     @Path("")
-    public String root() throws GitAPIException, IOException {
-        return "Github API";
+    public static List<String> apis() {
+        List<String> apis = new ArrayList<>();
+        apis.add(CONTEXT + "website");
+        apis.add(CONTEXT + "component/{name}");
+        return apis;
     }
 
     @GET
     @Path("website")
     public String websiteHook() throws GitAPIException, IOException {
+        // TODO: Change to POST and consume webhook call from github etc.
+        // Check if the web.yaml has changed
         websiteConfigService.reload();
         return "DONE";
     }
