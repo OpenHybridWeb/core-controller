@@ -89,13 +89,13 @@ public class StaticContentController {
         return targetEnv;
     }
 
-    public void updateConfigSecret(String env, WebsiteConfig websiteConfig) {
+    public void updateConfigSecret(String env, String namespace, WebsiteConfig websiteConfig) {
         StaticContentConfig config = createConfig(env, websiteConfig);
         String data = new Yaml().dumpAsMap(config);
-        updateConfigSecret(data);
+        updateConfigSecret(namespace, data);
     }
 
-    public void updateConfigSecret(String secretData) {
+    public void updateConfigSecret(String namespace, String secretData) {
         log.infof("Update core-staticcontent-config secret \n%s", secretData);
         Map<String, String> data = new HashMap<>();
         data.put("core-staticcontent-config.yaml", secretData);
@@ -103,7 +103,7 @@ public class StaticContentController {
         SecretBuilder config = new SecretBuilder()
                 .withMetadata(new ObjectMetaBuilder().withName(GATEWAY_CONFIG_NAME).build())
                 .withStringData(data);
-        client.secrets().createOrReplace(config.build());
+        client.inNamespace(namespace).secrets().createOrReplace(config.build());
     }
 
     public void deploy(String namespace) {

@@ -21,7 +21,7 @@ public class MainController {
 
     private static final Logger log = Logger.getLogger(MainController.class);
 
-    @ConfigProperty(name = "app.controller.namespaces.prefix")
+    @ConfigProperty(name = "app.controller.namespaces.defaultprefix")
     String namespacePrefix;
 
     @Inject
@@ -118,22 +118,22 @@ public class MainController {
         log.infof("Deploying website config, env=%s", env);
 
         String namespace = getNameSpaceName(env);
-        staticContentController.updateConfigSecret(env, config);
+        staticContentController.updateConfigSecret(env, namespace, config);
         staticContentController.deploy(namespace);
         // TODO: Wait till deployment is ready
 
-        gatewayController.updateConfigSecret(env, config);
+        gatewayController.updateConfigSecret(env, namespace, config);
         gatewayController.deploy(namespace);
     }
 
     public void redeploy(String env, WebsiteConfig config) {
         log.infof("Redeploying website config, env=%s", env);
         String namespace = getNameSpaceName(env);
-        staticContentController.updateConfigSecret(env, config);
+        staticContentController.updateConfigSecret(env, namespace, config);
         staticContentController.redeploy(namespace);
         // TODO: Wait till deployment is ready
 
-        gatewayController.updateConfigSecret(env, config);
+        gatewayController.updateConfigSecret(env, namespace, config);
         gatewayController.redeploy(namespace);
     }
 }

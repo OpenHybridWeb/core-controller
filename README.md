@@ -48,12 +48,17 @@ and just expose minikube api to port 8090
 kubectl proxy --port=8090
 ```
 
-Run controller on your JVM
+Run controller on your JVM which by defaults set 
+```
+app.controller.website.url=https://github.com/OpenHybridWeb/example-staticweb.git
+app.controller.env=dev
+quarkus.kubernetes-client.namespace=web-dev
+```
 
 ```shell
-mvn package
+kubectl create namespace web-dev
+mvn compile
 mvn quarkus:dev
-# or mvn -jar target/controller-1.0.0-SNAPSHOT-runner.jar
 ```
 
 #### Cleanup

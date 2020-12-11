@@ -64,13 +64,13 @@ public class GatewayController {
         return config;
     }
 
-    public void updateConfigSecret(String env, WebsiteConfig websiteConfig) {
+    public void updateConfigSecret(String env, String namespace, WebsiteConfig websiteConfig) {
         GatewayConfig gatewayConfig = createGatewayConfig(env, websiteConfig);
         String data = new Yaml().dumpAsMap(gatewayConfig);
-        updateConfigSecret(data);
+        updateConfigSecret(namespace, data);
     }
 
-    public void updateConfigSecret(String secretData) {
+    public void updateConfigSecret(String namespace, String secretData) {
         log.infof("Update config secret \n%s", secretData);
         Map<String, String> data = new HashMap<>();
         data.put("core-gateway-config.yaml", secretData);
@@ -78,7 +78,7 @@ public class GatewayController {
         SecretBuilder gatewayConfig = new SecretBuilder()
                 .withMetadata(new ObjectMetaBuilder().withName(GATEWAY_CONFIG_NAME).build())
                 .withStringData(data);
-        client.secrets().createOrReplace(gatewayConfig.build());
+        client.inNamespace(namespace).secrets().createOrReplace(gatewayConfig.build());
     }
 
     public void deploy(String namespace) {

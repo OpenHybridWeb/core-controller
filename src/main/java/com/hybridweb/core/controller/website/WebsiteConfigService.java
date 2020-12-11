@@ -34,7 +34,8 @@ public class WebsiteConfigService {
 
     String workDir = System.getProperty("user.dir");
 
-    String configPath = "/.openhybridweb/website.yaml";
+    @ConfigProperty(name = "app.controller.website.configDir")
+    String configPath;
 
     WebsiteConfig config;
 
