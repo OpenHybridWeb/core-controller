@@ -14,6 +14,7 @@ public class ApiRootResource {
     @Path("")
     public List<String> apis() {
         List<String> apis = WebHookResource.apis();
+        apis.addAll(StaticContentResource.apis());
         return apis;
     }
 

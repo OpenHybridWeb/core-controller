@@ -42,7 +42,7 @@ public class StaticContentController {
     WebClient staticContentClient;
 
     @ConfigProperty(name = "app.staticcontent.api.host")
-    protected String staticContentUrl;
+    String staticContentHost;
 
     @ConfigProperty(name = "app.staticcontent.api.port")
     int staticContentApiPort;
@@ -52,9 +52,10 @@ public class StaticContentController {
 
     void onStart(@Observes StartupEvent ev){
         this.staticContentClient = WebClient.create(vertx, new WebClientOptions()
-                .setDefaultHost(staticContentUrl)
+                .setDefaultHost(staticContentHost)
                 .setDefaultPort(staticContentApiPort)
                 .setTrustAll(true));
+        log.infof("Static content client created host=%s port=%s", staticContentHost, staticContentApiPort);
     }
 
     public StaticContentConfig createConfig(String targetEnv, WebsiteConfig websiteConfig) {
@@ -124,6 +125,19 @@ public class StaticContentController {
     public Uni<JsonObject> refreshComponent(String name) {
         log.infof("Refresh component name=%s", name);
         return staticContentClient.get("/_staticcontent/api/update/" + name).send().map(resp -> {
+            if (resp.statusCode() == 200) {
+                return resp.bodyAsJsonObject();
+            } else {
+                return new JsonObject()
+                        .put("code", resp.statusCode())
+                        .put("message", resp.bodyAsString());
+            }
+        });
+    }
+
+    public Uni<JsonObject> listComponents() {
+        log.infof("List components");
+        return staticContentClient.get("/_staticcontent/api/list").send().map(resp -> {
             if (resp.statusCode() == 200) {
                 return resp.bodyAsJsonObject();
             } else {
