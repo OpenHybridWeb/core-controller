@@ -11,7 +11,7 @@
 #
 # Then run the container using:
 #
-# docker run -i --rm -e APP_CONTROLLER_WEBSITE_URL=https://github.com/OpenHybridWeb/example-staticweb.git -p 8080:8080 openhybridweb/core-controller-fast-jar
+# docker run -i --rm -e APP_CONTROLLER_WEBSITE_URL=https://github.com/OpenHybridWeb/example-websites.git -e APP_CONTROLLER_WEBSITE_CONFIG_DIR=static -p 8080:8080 openhybridweb/core-controller-fast-jar
 #
 # If you want to include the debug port into your docker image
 # you will have to expose the debug port (default 5005) like this :  EXPOSE 8080 5050

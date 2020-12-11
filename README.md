@@ -2,7 +2,6 @@
 Core component to control gateway and staticcontent containers.
 
 Env variable pointing to git repo is `APP_CONTROLLER_WEBSITE_URL`.
-Default value is `https://github.com/OpenHybridWeb/example-staticweb.git`
 
 ## REST API
 
@@ -29,7 +28,7 @@ kubectl create namespace web-dev
 Service account, configmap and Deploy
 ```shell
 kubectl -n web-dev apply -f src/main/k8s/service-account.yaml
-kubectl -n web-dev create configmap core-controller-config --from-literal=APP_CONTROLLER_ENV=dev --from-literal=APP_CONTROLLER_WEBSITE_URL=https://github.com/OpenHybridWeb/example-staticweb.git
+kubectl -n web-dev create configmap core-controller-config --from-literal=APP_CONTROLLER_ENV=dev --from-literal=APP_CONTROLLER_WEBSITE_URL=https://github.com/OpenHybridWeb/example-websites.git --from-literal=APP_CONTROLLER_WEBSITE_CONFIG_DIR=static
 kubectl -n web-dev apply -f src/main/k8s/core-controller.yaml
 ```
 
@@ -55,7 +54,8 @@ kubectl proxy --port=8090
 
 Run controller on your JVM which by defaults set 
 ```
-app.controller.website.url=https://github.com/OpenHybridWeb/example-staticweb.git
+app.controller.website.url=https://github.com/OpenHybridWeb/example-websites.git
+app.controller.website.config.dir=static
 app.controller.env=dev
 ```
 
@@ -68,7 +68,7 @@ To deploy the controller as "operator" which creates appropriate namespaces and 
 
 ```shell
 mvn clean package
-APP_CONTROLLER_WEBSITE_URL=https://github.com/OpenHybridWeb/example-staticweb.git java -jar target/controller-1.0.0-SNAPSHOT-runner.jar
+APP_CONTROLLER_WEBSITE_URL=https://github.com/OpenHybridWeb/example-websites.git APP_CONTROLLER_WEBSITE_CONFIG_DIR=static java -jar target/controller-1.0.0-SNAPSHOT-runner.jar
 ```
 
 #### Cleanup

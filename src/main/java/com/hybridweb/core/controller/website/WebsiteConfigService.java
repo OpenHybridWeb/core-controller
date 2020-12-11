@@ -34,8 +34,10 @@ public class WebsiteConfigService {
 
     String workDir = System.getProperty("user.dir");
 
-    @ConfigProperty(name = "app.controller.website.configDir")
-    String configPath;
+    @ConfigProperty(name = "app.controller.website.config.dir")
+    String configDir;
+    @ConfigProperty(name = "app.controller.website.config.filename")
+    String configFilename;
 
     WebsiteConfig config;
 
@@ -56,7 +58,7 @@ public class WebsiteConfigService {
         } else {
             log.infof("Website config already cloned. skipping dir=%s", gitDir);
         }
-        try (InputStream is = new FileInputStream(gitDir.getAbsolutePath() + configPath)) {
+        try (InputStream is = new FileInputStream(getWebsiteConfigPath(gitDir.getAbsolutePath()))) {
             config = loadYaml(is);
         }
 
@@ -70,6 +72,10 @@ public class WebsiteConfigService {
         } else {
             mainController.deploy(env.get(), config);
         }
+    }
+
+    public String getWebsiteConfigPath(String baseDir) {
+        return baseDir + "/" + configDir + "/" + configFilename;
     }
 
     public File getGitDir() {
@@ -91,7 +97,7 @@ public class WebsiteConfigService {
         }
         log.infof("Website config pulled in dir=%s commit_message='%s'", gitDir, pullResult.getFetchResult().getMessages());
 
-        try (InputStream is = new FileInputStream(gitDir.getAbsolutePath() + configPath)) {
+        try (InputStream is = new FileInputStream(getWebsiteConfigPath(gitDir.getAbsolutePath()))) {
             config = WebsiteConfigService.loadYaml(is);
         }
 
