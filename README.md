@@ -67,6 +67,8 @@ mvn quarkus:dev
 To deploy the controller as "operator" which creates appropriate namespaces and deploy in each of them configured controller
 
 ```shell
+kubectl -n default apply -f src/main/k8s/service-account.yaml
+
 mvn clean package
 APP_CONTROLLER_WEBSITE_URL=https://github.com/OpenHybridWeb/example-websites.git APP_CONTROLLER_WEBSITE_CONFIG_DIR=static-restapi java -jar target/controller-1.0.0-SNAPSHOT-runner.jar
 ```
