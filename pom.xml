@@ -33,7 +33,7 @@
         <surefire-plugin.version>2.22.1</surefire-plugin.version>
         <compiler-plugin.version>3.8.1</compiler-plugin.version>
 
-        <quarkus.platform.version>1.10.2.Final</quarkus.platform.version>
+        <quarkus.platform.version>1.10.3.Final</quarkus.platform.version>
         <snakeyaml.version>1.27</snakeyaml.version>
         <jgit.version>5.8.0.202006091008-r</jgit.version>
 
