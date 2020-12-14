@@ -7,8 +7,10 @@ Env variable pointing to git repo is `APP_CONTROLLER_WEBSITE_URL`.
 
 * /health/live
 * /health/ready
-* /_controller/api/github/website
-* /_controller/api/github/component/{name}
+* /_controller/api/webhook/website
+* /_controller/api/webhook/component/{name}
+* /_controller/api/staticcontent/components
+* /_controller/api/staticcontent/update/{name}
 
 
 ## How to run
@@ -22,19 +24,19 @@ minikube start
 
 Namespace
 ```shell
-kubectl create namespace web-dev
+kubectl create namespace dev
 ```
 
 Service account, configmap and Deploy
 ```shell
-kubectl -n web-dev apply -f src/main/k8s/service-account.yaml
-kubectl -n web-dev create configmap core-controller-config --from-literal=APP_CONTROLLER_ENV=dev --from-literal=APP_CONTROLLER_WEBSITE_URL=https://github.com/OpenHybridWeb/example-websites.git --from-literal=APP_CONTROLLER_WEBSITE_CONFIG_DIR=static
-kubectl -n web-dev apply -f src/main/k8s/core-controller.yaml
+kubectl -n dev apply -f src/main/k8s/service-account.yaml
+kubectl -n dev create configmap core-controller-config --from-literal=APP_CONTROLLER_ENV=dev --from-literal=APP_CONTROLLER_WEBSITE_URL=https://github.com/OpenHybridWeb/example-websites.git --from-literal=APP_CONTROLLER_WEBSITE_CONFIG_DIR=static
+kubectl -n dev apply -f src/main/k8s/core-controller.yaml
 ```
 
 You're done. Expose the gateway via
 ```shell
-minikube -n web-dev service core-gateway
+minikube -n dev service core-gateway
 ```
 
 See the result in dashboard
@@ -48,7 +50,7 @@ minikube dashboard
 
 Just create a namespace and expose minikube api to port 8090
 ```shell
-kubectl create namespace web-dev
+kubectl create namespace dev
 kubectl proxy --port=8090
 ```
 
