@@ -74,7 +74,7 @@ public class MainController {
         Map<String, String> data = new HashMap<>();
         data.put("APP_CONTROLLER_ENV", env);
         if (StringUtils.isNotEmpty(namespacePrefix)) {
-            data.put("APP_CONTROLLER_NAMESPACE_PREFIX", env);
+            data.put("APP_CONTROLLER_NAMESPACE_PREFIX", namespacePrefix);
         }
         data.put("APP_CONTROLLER_WEBSITE_CONFIG_DIR", configDir);
         data.put("APP_CONTROLLER_WEBSITE_CONFIG_FILENAME", configFilename);
