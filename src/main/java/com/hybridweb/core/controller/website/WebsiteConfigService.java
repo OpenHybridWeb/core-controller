@@ -3,6 +3,7 @@ package com.hybridweb.core.controller.website;
 import com.hybridweb.core.controller.MainController;
 import com.hybridweb.core.controller.website.model.WebsiteConfig;
 import io.quarkus.runtime.StartupEvent;
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.PullResult;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -41,11 +42,9 @@ public class WebsiteConfigService {
 
     WebsiteConfig config;
 
-
     @Inject
     public
     MainController mainController;
-
 
     void onStart(@Observes StartupEvent ev) throws GitAPIException, IOException {
         log.info("Initializing website config");
@@ -63,11 +62,12 @@ public class WebsiteConfigService {
         }
 
         List<String> envs = config.getDefaults().getEnvs();
-        if (env.isEmpty() || !envs.contains(env.get())) {
-            log.infof("desired env %s is not on the list. Going to create appropriate namespaces", env.orElse(""));
-            mainController.createNamespaces(envs);
+        if (env.isEmpty()) {
+            log.info("ENV is not defined. Going to create appropriate namespaces (like operator)");
+            String prefix = StringUtils.trimToEmpty(config.getDefaults().getNamespacePrefix());
+            mainController.createNamespaces(prefix, envs);
             for (String e : envs) {
-                mainController.deployController(e, gitUrl, configDir, configFilename);
+                mainController.deployController(e, gitUrl, configDir, configFilename, prefix);
             }
         } else {
             mainController.deploy(env.get(), config);

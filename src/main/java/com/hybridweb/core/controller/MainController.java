@@ -6,6 +6,7 @@ import com.hybridweb.core.controller.website.model.WebsiteConfig;
 import io.fabric8.kubernetes.api.model.*;
 import io.fabric8.kubernetes.api.model.rbac.*;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
 
@@ -15,14 +16,15 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @ApplicationScoped
 public class MainController {
 
     private static final Logger log = Logger.getLogger(MainController.class);
 
-    @ConfigProperty(name = "app.controller.namespaces.defaultprefix")
-    String namespacePrefix;
+    @ConfigProperty(name = "app.controller.namespace.prefix")
+    Optional<String> namespacePrefix;
 
     @Inject
     GatewayController gatewayController;
@@ -37,36 +39,43 @@ public class MainController {
     String nameSpaceLabelValue = "openhybridweb";
     String CONTROLLER_CONFIG_NAME = "core-controller-config";
 
-    public void createNamespaces(List<String> envs) {
+    public void createNamespaces(String prefix, List<String> envs) {
         for (String env : envs) {
-            String name = getNameSpaceName(env);
+            String name = getNameSpaceName(prefix, env);
             Namespace ns = new NamespaceBuilder().withNewMetadata().withName(name).addToLabels("app", nameSpaceLabelValue).endMetadata().build();
             client.namespaces().withName(name).createOrReplace(ns);
             log.infof("Namespace %s created", name);
         }
     }
 
-    public String getNameSpaceName(String env) {
+    public String getNameSpaceName(String namespacePrefix, String env) {
         return namespacePrefix + env;
     }
 
-    public void deployController(String env, String gitUrl, String configDir, String configFilename) {
+    public String getNameSpaceName(String env) {
+        return getNameSpaceName(namespacePrefix.orElse(""), env);
+    }
+
+    public void deployController(String env, String gitUrl, String configDir, String configFilename, String namespacePrefix) {
         InputStream service = StaticContentController.class.getResourceAsStream("/k8s/core-controller.yaml");
         String namespace = getNameSpaceName(env);
 
         updateServiceAccount(env);
-        updateControllerConfig(env, gitUrl, configDir, configFilename);
+        updateControllerConfig(env, gitUrl, configDir, configFilename, namespacePrefix);
 
         client.inNamespace(namespace).load(service).createOrReplace();
         log.infof("Controller created in namespace=%s", namespace);
     }
 
-    public void updateControllerConfig(String env, String gitUrl, String configDir, String configFilename) {
+    public void updateControllerConfig(String env, String gitUrl, String configDir, String configFilename, String namespacePrefix) {
         String namespace = getNameSpaceName(env);
 
         log.infof("Update core-controller-config namespace=%s", namespace);
         Map<String, String> data = new HashMap<>();
         data.put("APP_CONTROLLER_ENV", env);
+        if (StringUtils.isNotEmpty(namespacePrefix)) {
+            data.put("APP_CONTROLLER_NAMESPACE_PREFIX", env);
+        }
         data.put("APP_CONTROLLER_WEBSITE_CONFIG_DIR", configDir);
         data.put("APP_CONTROLLER_WEBSITE_CONFIG_FILENAME", configFilename);
         data.put("APP_CONTROLLER_WEBSITE_URL", gitUrl);
