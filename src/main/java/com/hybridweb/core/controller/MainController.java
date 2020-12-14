@@ -44,7 +44,7 @@ public class MainController {
             String name = getNameSpaceName(prefix, env);
             Namespace ns = new NamespaceBuilder().withNewMetadata().withName(name).addToLabels("app", nameSpaceLabelValue).endMetadata().build();
             client.namespaces().withName(name).createOrReplace(ns);
-            log.infof("Namespace %s created", name);
+            log.infof("Namespace created. name=%s", name);
         }
     }
 
