@@ -58,9 +58,9 @@ public class MainController {
 
     public void deployController(String env, String gitUrl, String configDir, String configFilename, String namespacePrefix) {
         InputStream service = StaticContentController.class.getResourceAsStream("/k8s/core-controller.yaml");
-        String namespace = getNameSpaceName(env);
+        String namespace = getNameSpaceName(namespacePrefix, env);
 
-        updateServiceAccount(env);
+        updateServiceAccount(namespace);
         updateControllerConfig(env, gitUrl, configDir, configFilename, namespacePrefix);
 
         client.inNamespace(namespace).load(service).createOrReplace();
@@ -68,7 +68,7 @@ public class MainController {
     }
 
     public void updateControllerConfig(String env, String gitUrl, String configDir, String configFilename, String namespacePrefix) {
-        String namespace = getNameSpaceName(env);
+        String namespace = getNameSpaceName(namespacePrefix, env);
 
         log.infof("Update core-controller-config namespace=%s", namespace);
         Map<String, String> data = new HashMap<>();
@@ -86,8 +86,7 @@ public class MainController {
         client.inNamespace(namespace).configMaps().createOrReplace(configMap.build());
     }
 
-    public void updateServiceAccount(String env) {
-        String namespace = getNameSpaceName(env);
+    public void updateServiceAccount(String namespace) {
         log.infof("Update service-account namespace=%s", namespace);
         ServiceAccountBuilder saBuilder = new ServiceAccountBuilder()
                 .withMetadata(new ObjectMetaBuilder().withName("core-controller").build());
