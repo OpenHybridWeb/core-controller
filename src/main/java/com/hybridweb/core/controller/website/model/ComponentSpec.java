@@ -6,6 +6,7 @@ import java.util.Map;
 public class ComponentSpec {
     String url;
     String dir;
+    String targetContext;
     List<Map<String, Object>> envs;
 
     public String getUrl() {
@@ -22,6 +23,14 @@ public class ComponentSpec {
 
     public void setDir(String dir) {
         this.dir = dir;
+    }
+
+    public String getTargetContext() {
+        return targetContext;
+    }
+
+    public void setTargetContext(String targetContext) {
+        this.targetContext = targetContext;
     }
 
     public List<Map<String, Object>> getEnvs() {

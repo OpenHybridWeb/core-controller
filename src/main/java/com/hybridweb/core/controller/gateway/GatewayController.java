@@ -48,18 +48,18 @@ public class GatewayController {
             }
             String routeContext = c.getContext() + "*";
             String url;
+            String targetContext = c.getSpec().getTargetContext();
             if (c.isKindGit()) {
                 url = staticContentUrl;
+                if (StringUtils.isEmpty(targetContext) && StringUtils.equals("/", c.getContext())) {
+                    targetContext = rootContext;
+                }
             } else if (c.isKindService()) {
                 url = c.getSpec().getUrl();
             } else {
                 throw new RuntimeException("Unknown kind: " + c.getKind());
             }
-            if (StringUtils.equals("/", c.getContext())) {
-                config.addRoute(routeContext, url, rootContext);
-            } else {
-                config.addRoute(routeContext, url);
-            }
+            config.addRoute(routeContext, url, targetContext);
         }
         return config;
     }

@@ -6,9 +6,13 @@ import java.util.List;
 public class GatewayConfig {
     List<Route> routes = new LinkedList<>();
 
-    public void addRoute(String context, String url) {
-        routes.add(new Route(context, url));
-    }
+    /**
+     * Add route
+     *
+     * @param context       incoming context
+     * @param url           target url
+     * @param targetContext context is replaced by targetContext
+     */
     public void addRoute(String context, String url, String targetContext) {
         routes.add(new Route(context, url, targetContext));
     }
