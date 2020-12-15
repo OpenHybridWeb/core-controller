@@ -25,7 +25,7 @@ class GatewayControllerTest {
         gatewayController.rootContext = "/_test_root/";
         GatewayConfig config = gatewayController.createGatewayConfig(env, websiteConfig);
 
-        assertEquals(4, config.getRoutes().size());
+        assertEquals(5, config.getRoutes().size());
         GatewayConfig.Route route1 = config.getRoutes().get(0);
         assertEquals("/test-only-dev/*", route1.getContext());
         assertEquals(staticContentUrl, route1.getUrl());
@@ -38,7 +38,12 @@ class GatewayControllerTest {
         assertEquals("/_api/*", routeApi.getContext());
         assertEquals("http://core-controller:8080", routeApi.getUrl());
 
-        GatewayConfig.Route route3 = config.getRoutes().get(3);
+        GatewayConfig.Route routeApiReplace = config.getRoutes().get(3);
+        assertEquals("/api-replaced/*", routeApiReplace.getContext());
+        assertEquals("http://core-controller:8080", routeApiReplace.getUrl());
+        assertEquals("/api-new/", routeApiReplace.getTargetContext());
+
+        GatewayConfig.Route route3 = config.getRoutes().get(4);
         assertEquals("/*", route3.getContext());
         assertEquals("/_test_root/", route3.getTargetContext());
         assertEquals(staticContentUrl, route2.getUrl());

@@ -24,6 +24,11 @@ components:
     kind: service
     spec:
       url: http://core-controller:8080
+  - context: /api-replaced/
+    kind: service
+    spec:
+      url: http://core-controller:8080
+      targetContext: /api-new/
   # root
   - context: /
     kind: git
