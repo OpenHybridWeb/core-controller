@@ -37,6 +37,9 @@ public class IngressController {
     @ConfigProperty(name = "app.staticcontent.rootcontext")
     protected String rootContext;
 
+    @ConfigProperty(name = "app.controller.website.domain")
+    protected String domain;
+
     public void updateIngress(String targetEnv, String namespace, WebsiteConfig config) throws MalformedURLException {
         List<HTTPIngressPath> paths = new ArrayList<>();
         for (ComponentConfig c : config.getComponents()) {
@@ -69,8 +72,7 @@ public class IngressController {
             path.setBackend(backend);
             paths.add(path);
         }
-        // TODO: Correct host
-        IngressRule rule = new IngressRuleBuilder().withHost("minikube.info").withNewHttp().withPaths(paths).endHttp().build();
+        IngressRule rule = new IngressRuleBuilder().withHost(domain).withNewHttp().withPaths(paths).endHttp().build();
 
         Map<String, String> annotations = new LinkedHashMap<>();
 //        annotations.put("nginx.ingress.kubernetes.io/rewrite-target", "/$1");

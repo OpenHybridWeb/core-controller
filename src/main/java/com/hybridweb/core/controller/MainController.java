@@ -33,7 +33,6 @@ public class MainController {
     DefaultKubernetesClient client;
 
     String nameSpaceLabelValue = "openhybridweb";
-    String CONTROLLER_CONFIG_NAME = "core-controller-config";
 
     public void createNamespaces(String prefix, List<String> envs) {
         for (String env : envs) {

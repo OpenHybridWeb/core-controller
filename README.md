@@ -26,19 +26,19 @@ minikube start --addons ingress,dashboard
 Start tunnel
 ```shell
 minikube tunnel
-echo "$(minikube ip) minikube.info" | sudo tee -a /etc/hosts
+echo "$(minikube ip) minikube.info static.minikube.info static-restapi.minikube.info" | sudo tee -a /etc/hosts
 ```
 
 Namespace
 ```shell
-kubectl create namespace dev
+kubectl create namespace static-dev
 ```
 
 Service account, configmap and Deploy
 ```shell
-kubectl -n dev apply -f src/main/k8s/service-account.yaml
-kubectl -n dev create configmap core-controller-config --from-literal=APP_CONTROLLER_ENV=dev --from-literal=APP_CONTROLLER_WEBSITE_URL=https://github.com/OpenHybridWeb/example-websites.git --from-literal=APP_CONTROLLER_WEBSITE_CONFIG_DIR=static
-kubectl -n dev apply -f src/main/k8s/core-controller.yaml
+kubectl -n static-dev apply -f src/main/k8s/service-account.yaml
+kubectl -n static-dev create configmap core-controller-config --from-literal=APP_CONTROLLER_WEBSITE_DOMAIN=static.minikube.info --from-literal=APP_CONTROLLER_ENV=dev --from-literal=APP_CONTROLLER_WEBSITE_URL=https://github.com/OpenHybridWeb/example-websites.git --from-literal=APP_CONTROLLER_WEBSITE_CONFIG_DIR=static
+kubectl -n static-dev apply -f src/main/k8s/core-controller.yaml
 ```
 
 You're done. Visit [http://minikube.info](http://minikube.info)
