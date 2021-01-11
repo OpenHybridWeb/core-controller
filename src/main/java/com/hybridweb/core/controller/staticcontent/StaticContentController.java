@@ -31,7 +31,8 @@ public class StaticContentController {
 
     private static final Logger log = Logger.getLogger(StaticContentController.class);
 
-    static final String GATEWAY_CONFIG_NAME = "core-staticcontent-config";
+    static final String STATIC_CONFIG_NAME = "core-staticcontent-config";
+    static final String STATIC_CONFIG_HTTPD_NAME = "core-staticcontent-config-httpd";
 
     @Inject
     DefaultKubernetesClient client;
@@ -83,6 +84,29 @@ public class StaticContentController {
         return config;
     }
 
+    public StringBuffer createAliases(String targetEnv, WebsiteConfig websiteConfig) {
+        StringBuffer config = new StringBuffer();
+        if (!Utils.isEnvEnabled(websiteConfig.getDefaults(), targetEnv)) {
+            return config;
+        }
+        for (ComponentConfig c : websiteConfig.getComponents()) {
+            ComponentSpec spec = c.getSpec();
+            List<Map<String, Object>> envs = spec.getEnvs();
+            if (!Utils.isEnvIncluded(envs, targetEnv)) {
+                continue;
+            }
+
+            if (c.getKind().equals("git")) {
+                String dir = c.getContext();
+                if (StringUtils.equals("/", c.getContext())) {
+                    continue;
+                }
+                config.append("Alias "+ dir + " /var/www/components" + dir);
+            }
+        }
+        return config;
+    }
+
     public String getRef(List<Map<String, Object>> envs, String targetEnv) {
         if (envs == null) {
             return targetEnv;
@@ -97,6 +121,9 @@ public class StaticContentController {
         StaticContentConfig config = createConfig(env, websiteConfig);
         String data = new Yaml().dumpAsMap(config);
         updateConfigSecret(namespace, data);
+
+        String aliases = createAliases(env, websiteConfig).toString();
+        updateConfigHttpdSecret(namespace, aliases);
     }
 
     public void updateConfigSecret(String namespace, String secretData) {
@@ -105,10 +132,22 @@ public class StaticContentController {
         data.put("core-staticcontent-config.yaml", secretData);
 
         SecretBuilder config = new SecretBuilder()
-                .withMetadata(new ObjectMetaBuilder().withName(GATEWAY_CONFIG_NAME).build())
+                .withMetadata(new ObjectMetaBuilder().withName(STATIC_CONFIG_NAME).build())
                 .withStringData(data);
         client.inNamespace(namespace).secrets().createOrReplace(config.build());
     }
+
+    public void updateConfigHttpdSecret(String namespace, String aliasesData) {
+        log.infof("Update core-staticcontent-config-httpd secret in namespace=%s\n%s", namespace, aliasesData);
+        Map<String, String> dataAlias = new HashMap<>();
+        dataAlias.put("aliases.conf", aliasesData);
+
+        SecretBuilder configAlias = new SecretBuilder()
+                .withMetadata(new ObjectMetaBuilder().withName(STATIC_CONFIG_HTTPD_NAME).build())
+                .withStringData(dataAlias);
+        client.inNamespace(namespace).secrets().createOrReplace(configAlias.build());
+    }
+
 
     public void deploy(String namespace) {
         InputStream service = StaticContentController.class.getResourceAsStream("/k8s/core-staticcontent.yaml");

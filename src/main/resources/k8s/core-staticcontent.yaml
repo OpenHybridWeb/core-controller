@@ -7,11 +7,12 @@ metadata:
 spec:
   type: NodePort
   ports:
-    # Expose nginx
+    # Expose main container
     - port: 80
+      targetPort: 8080
       name: http
     # Expose rest api
-    - port: 8080
+    - port: 8090
       name: http-api
   selector:
     app: core-staticcontent
@@ -49,30 +50,37 @@ spec:
       containers:
         # Main container to serve data
         - name: main-container
-          image: "nginx"
+          image: "spaship/httpd"
           resources:
             requests:
               cpu: 100m
               memory: 100Mi
           ports:
-            - containerPort: 80
+            - containerPort: 8080
           volumeMounts:
-            - mountPath: "/usr/share/nginx/html"
+            # ROOT context - Make available only _root component
+            - mountPath: "/var/www/html/"
               name: data
+              subPath: _root
+            # Other components outside root and available via Aliases
+            - mountPath: "/var/www/components/"
+              name: data
+            - mountPath: "/etc/httpd/conf.d/custom/"
+              name: secret-config-httpd
         # Side car container providing API
         - name: core-staticcontent-api
           image: "openhybridweb/core-staticcontent:latest"
           livenessProbe:
             httpGet:
               path: "/"
-              port: 8080
+              port: 8090
             initialDelaySeconds: 5
             failureThreshold: 10
             periodSeconds: 5
           readinessProbe:
             httpGet:
               path: "/"
-              port: 8080
+              port: 8090
             initialDelaySeconds: 5
             failureThreshold: 5
             periodSeconds: 5
@@ -81,7 +89,7 @@ spec:
               cpu: 100m
               memory: 100Mi
           ports:
-            - containerPort: 8080
+            - containerPort: 8090
           env:
             - name: DATA_DIR
               value: "/app/data/"
@@ -92,5 +100,8 @@ spec:
         - name: secret-config
           secret:
             secretName: core-staticcontent-config
+        - name: secret-config-httpd
+          secret:
+            secretName: core-staticcontent-config-httpd
         - name: data
           emptyDir: { }
