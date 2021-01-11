@@ -1,6 +1,7 @@
 package com.hybridweb.core.controller.website;
 
 import com.hybridweb.core.controller.MainController;
+import com.hybridweb.core.controller.gateway.IngressController;
 import com.hybridweb.core.controller.website.model.WebsiteConfig;
 import io.quarkus.runtime.StartupEvent;
 import org.apache.commons.lang3.StringUtils;
@@ -43,7 +44,6 @@ public class WebsiteConfigService {
     WebsiteConfig config;
 
     @Inject
-    public
     MainController mainController;
 
     void onStart(@Observes StartupEvent ev) throws GitAPIException, IOException {
@@ -67,10 +67,10 @@ public class WebsiteConfigService {
             String prefix = StringUtils.trimToEmpty(config.getDefaults().getNamespacePrefix());
             mainController.createNamespaces(prefix, envs);
             for (String e : envs) {
-                mainController.deployController(e, gitUrl, configDir, configFilename, prefix);
+                mainController.setupCoreServices(e, config);
             }
         } else {
-            mainController.deploy(env.get(), config);
+            mainController.setupCoreServices(env.get(), config);
         }
     }
 

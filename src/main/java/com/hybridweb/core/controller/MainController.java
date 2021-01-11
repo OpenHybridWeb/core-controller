@@ -1,21 +1,18 @@
 package com.hybridweb.core.controller;
 
-import com.hybridweb.core.controller.gateway.GatewayController;
+import com.hybridweb.core.controller.gateway.IngressController;
 import com.hybridweb.core.controller.staticcontent.StaticContentController;
 import com.hybridweb.core.controller.website.model.WebsiteConfig;
 import io.fabric8.kubernetes.api.model.*;
 import io.fabric8.kubernetes.api.model.rbac.*;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import java.io.InputStream;
-import java.util.HashMap;
+import java.net.MalformedURLException;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @ApplicationScoped
@@ -27,11 +24,10 @@ public class MainController {
     Optional<String> namespacePrefix;
 
     @Inject
-    GatewayController gatewayController;
-
-    @Inject
     StaticContentController staticContentController;
 
+    @Inject
+    IngressController ingressController;
 
     @Inject
     DefaultKubernetesClient client;
@@ -56,34 +52,12 @@ public class MainController {
         return getNameSpaceName(namespacePrefix.orElse(""), env);
     }
 
-    public void deployController(String env, String gitUrl, String configDir, String configFilename, String namespacePrefix) {
-        InputStream service = StaticContentController.class.getResourceAsStream("/k8s/core-controller.yaml");
-        String namespace = getNameSpaceName(namespacePrefix, env);
+    public void setupCoreServices(String env, WebsiteConfig config) throws MalformedURLException {
+        String namespace = getNameSpaceName(config.getDefaults().getNamespacePrefix(), env);
+        staticContentController.updateConfigSecret(env, namespace, config);
+        staticContentController.deploy(namespace);
 
-        updateServiceAccount(namespace);
-        updateControllerConfig(env, gitUrl, configDir, configFilename, namespacePrefix);
-
-        client.inNamespace(namespace).load(service).createOrReplace();
-        log.infof("Controller created in namespace=%s", namespace);
-    }
-
-    public void updateControllerConfig(String env, String gitUrl, String configDir, String configFilename, String namespacePrefix) {
-        String namespace = getNameSpaceName(namespacePrefix, env);
-
-        log.infof("Update core-controller-config namespace=%s", namespace);
-        Map<String, String> data = new HashMap<>();
-        data.put("APP_CONTROLLER_ENV", env);
-        if (StringUtils.isNotEmpty(namespacePrefix)) {
-            data.put("APP_CONTROLLER_NAMESPACE_PREFIX", namespacePrefix);
-        }
-        data.put("APP_CONTROLLER_WEBSITE_CONFIG_DIR", configDir);
-        data.put("APP_CONTROLLER_WEBSITE_CONFIG_FILENAME", configFilename);
-        data.put("APP_CONTROLLER_WEBSITE_URL", gitUrl);
-
-        ConfigMapBuilder configMap = new ConfigMapBuilder()
-                .withMetadata(new ObjectMetaBuilder().withName(CONTROLLER_CONFIG_NAME).build())
-                .withData(data);
-        client.inNamespace(namespace).configMaps().createOrReplace(configMap.build());
+        ingressController.updateIngress(env, namespace, config);
     }
 
     public void updateServiceAccount(String namespace) {
@@ -122,26 +96,13 @@ public class MainController {
         return rb;
     }
 
-    public void deploy(String env, WebsiteConfig config) {
-        String namespace = getNameSpaceName(env);
-        log.infof("Deploying website config, env=%s namespace=%s", env, namespace);
-
-        staticContentController.updateConfigSecret(env, namespace, config);
-        staticContentController.deploy(namespace);
-        // TODO: Wait till deployment is ready
-
-        gatewayController.updateConfigSecret(env, namespace, config);
-        gatewayController.deploy(namespace);
-    }
-
-    public void redeploy(String env, WebsiteConfig config) {
+    public void redeploy(String env, WebsiteConfig config) throws MalformedURLException {
         log.infof("Redeploying website config, env=%s", env);
         String namespace = getNameSpaceName(env);
         staticContentController.updateConfigSecret(env, namespace, config);
         staticContentController.redeploy(namespace);
         // TODO: Wait till deployment is ready
 
-        gatewayController.updateConfigSecret(env, namespace, config);
-        gatewayController.redeploy(namespace);
+        ingressController.updateIngress(env, namespace, config);
     }
 }

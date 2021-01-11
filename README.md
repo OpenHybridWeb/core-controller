@@ -19,7 +19,14 @@ Env variable pointing to git repo is `APP_CONTROLLER_WEBSITE_URL`.
 
 Start minikube
 ```shell
-minikube start
+minikube config set driver hyperkit
+minikube start --addons ingress,dashboard
+```
+
+Start tunnel
+```shell
+minikube tunnel
+echo "$(minikube ip) minikube.info" | sudo tee -a /etc/hosts
 ```
 
 Namespace
@@ -34,17 +41,7 @@ kubectl -n dev create configmap core-controller-config --from-literal=APP_CONTRO
 kubectl -n dev apply -f src/main/k8s/core-controller.yaml
 ```
 
-You're done. Expose the gateway via
-```shell
-minikube -n dev service core-gateway
-```
-
-See the result in dashboard
-
-```shell
-minikube dashboard
-```
-
+You're done. Visit [http://minikube.info](http://minikube.info)
 
 ### Local Development
 
