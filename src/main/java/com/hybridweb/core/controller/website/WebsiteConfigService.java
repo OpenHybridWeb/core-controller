@@ -1,7 +1,6 @@
 package com.hybridweb.core.controller.website;
 
 import com.hybridweb.core.controller.MainController;
-import com.hybridweb.core.controller.gateway.IngressController;
 import com.hybridweb.core.controller.website.model.WebsiteConfig;
 import io.quarkus.runtime.StartupEvent;
 import org.apache.commons.lang3.StringUtils;

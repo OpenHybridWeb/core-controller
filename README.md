@@ -1,5 +1,5 @@
 # core-controller
-Core component to control gateway and staticcontent containers.
+Core component to control static content containers.
 
 Env variable pointing to git repo is `APP_CONTROLLER_WEBSITE_URL`.
 
