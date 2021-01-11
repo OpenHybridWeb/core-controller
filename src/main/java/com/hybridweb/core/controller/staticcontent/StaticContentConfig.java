@@ -1,8 +1,11 @@
 package com.hybridweb.core.controller.staticcontent;
 
+import io.quarkus.runtime.annotations.RegisterForReflection;
+
 import java.util.LinkedList;
 import java.util.List;
 
+@RegisterForReflection
 public class StaticContentConfig {
     List<StaticComponent> components = new LinkedList<>();
 
@@ -14,6 +17,7 @@ public class StaticContentConfig {
         components.add(new StaticComponent(dir, kind, gitUrl, gitRef, gitDir));
     }
 
+    @RegisterForReflection
     public class StaticComponent {
         String dir;
         String kind;
@@ -30,6 +34,7 @@ public class StaticContentConfig {
             this.spec = new GitSpec(gitUrl, gitRef, gitDir);
         }
 
+        @RegisterForReflection
         public class GitSpec {
             String url;
             String ref;

@@ -1,8 +1,11 @@
 package com.hybridweb.core.controller.website.model;
 
+import io.quarkus.runtime.annotations.RegisterForReflection;
+
 import java.util.List;
 import java.util.Map;
 
+@RegisterForReflection
 public class ComponentSpec {
     String url;
     String dir;

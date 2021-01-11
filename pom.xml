@@ -35,7 +35,6 @@
 
         <quarkus.platform.version>1.10.3.Final</quarkus.platform.version>
         <snakeyaml.version>1.27</snakeyaml.version>
-        <jgit.version>5.8.0.202006091008-r</jgit.version>
 
         <!-- By default just do maven install and let github to do the deploy on release -->
         <release.goal>install</release.goal>
@@ -70,6 +69,10 @@
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-resteasy-jackson</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-jgit</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>io.quarkus</groupId>
@@ -83,12 +86,6 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.eclipse.jgit</groupId>
-            <artifactId>org.eclipse.jgit</artifactId>
-            <version>${jgit.version}</version>
         </dependency>
 
         <dependency>

@@ -1,5 +1,8 @@
 package com.hybridweb.core.controller.website.model;
 
+import io.quarkus.runtime.annotations.RegisterForReflection;
+
+@RegisterForReflection
 public class ComponentConfig {
     String context;
     String kind;
