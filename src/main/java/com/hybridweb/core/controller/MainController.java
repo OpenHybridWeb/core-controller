@@ -47,10 +47,6 @@ public class MainController {
         return namespacePrefix + env;
     }
 
-    public String getNameSpaceName(String env) {
-        return getNameSpaceName(namespacePrefix.orElse(""), env);
-    }
-
     public void setupCoreServices(String env, WebsiteConfig config) throws MalformedURLException {
         String namespace = getNameSpaceName(config.getDefaults().getNamespacePrefix(), env);
         staticContentController.updateConfigSecret(env, namespace, config);
@@ -97,7 +93,7 @@ public class MainController {
 
     public void redeploy(String env, WebsiteConfig config) throws MalformedURLException {
         log.infof("Redeploying website config, env=%s", env);
-        String namespace = getNameSpaceName(env);
+        String namespace = getNameSpaceName(config.getDefaults().getNamespacePrefix(), env);
         staticContentController.updateConfigSecret(env, namespace, config);
         staticContentController.redeploy(namespace);
         // TODO: Wait till deployment is ready
