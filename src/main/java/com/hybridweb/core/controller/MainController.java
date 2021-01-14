@@ -3,7 +3,10 @@ package com.hybridweb.core.controller;
 import com.hybridweb.core.controller.gateway.IngressController;
 import com.hybridweb.core.controller.staticcontent.StaticContentController;
 import com.hybridweb.core.controller.website.model.WebsiteConfig;
-import io.fabric8.kubernetes.api.model.*;
+import io.fabric8.kubernetes.api.model.Namespace;
+import io.fabric8.kubernetes.api.model.NamespaceBuilder;
+import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
+import io.fabric8.kubernetes.api.model.ServiceAccountBuilder;
 import io.fabric8.kubernetes.api.model.rbac.*;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -52,7 +55,7 @@ public class MainController {
         staticContentController.updateConfigSecret(env, namespace, config);
         staticContentController.deploy(namespace);
 
-        ingressController.updateIngress(env, namespace, config);
+//        ingressController.updateIngress(env, namespace, config);
     }
 
     public void updateServiceAccount(String namespace) {
@@ -98,6 +101,6 @@ public class MainController {
         staticContentController.redeploy(namespace);
         // TODO: Wait till deployment is ready
 
-        ingressController.updateIngress(env, namespace, config);
+//        ingressController.updateIngress(env, namespace, config);
     }
 }
