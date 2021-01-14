@@ -1,6 +1,12 @@
 apiVersion: 1
-defaults:
-  envs: [ dev, stage, prod ]
+
+envs:
+  - name: "dev"
+    namespace: ns-1
+  - name: "stage"
+    namespace: ns-2
+  - name: "prod"
+    namespace: ns-3
 
 components:
   - context: /test1

@@ -9,7 +9,7 @@ public class WebsiteConfig {
 
     String apiVersion;
 
-    WebsiteDefaults websiteDefaults;
+    List<Environment> envs;
 
     List<ComponentConfig> components;
 
@@ -29,11 +29,20 @@ public class WebsiteConfig {
         this.components = components;
     }
 
-    public WebsiteDefaults getDefaults() {
-        return websiteDefaults;
+    public List<Environment> getEnvs() {
+        return envs;
     }
 
-    public void setDefaults(WebsiteDefaults websiteDefaults) {
-        this.websiteDefaults = websiteDefaults;
+    public void setEnvs(List<Environment> envs) {
+        this.envs = envs;
+    }
+
+    public Environment getEnvironment(String envName) {
+        for (Environment env : getEnvs()) {
+            if (env.getName().equals(envName)) {
+                return env;
+            }
+        }
+        return null;
     }
 }

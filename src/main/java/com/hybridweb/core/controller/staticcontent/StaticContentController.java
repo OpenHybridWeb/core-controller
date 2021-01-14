@@ -61,7 +61,7 @@ public class StaticContentController {
 
     public StaticContentConfig createConfig(String targetEnv, WebsiteConfig websiteConfig) {
         StaticContentConfig config = new StaticContentConfig();
-        if (!Utils.isEnvEnabled(websiteConfig.getDefaults(), targetEnv)) {
+        if (!Utils.isEnvEnabled(websiteConfig, targetEnv)) {
             return config;
         }
         for (ComponentConfig c : websiteConfig.getComponents()) {
@@ -86,7 +86,7 @@ public class StaticContentController {
 
     public StringBuffer createAliases(String targetEnv, WebsiteConfig websiteConfig) {
         StringBuffer config = new StringBuffer();
-        if (!Utils.isEnvEnabled(websiteConfig.getDefaults(), targetEnv)) {
+        if (!Utils.isEnvEnabled(websiteConfig, targetEnv)) {
             return config;
         }
         for (ComponentConfig c : websiteConfig.getComponents()) {

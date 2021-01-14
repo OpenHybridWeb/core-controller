@@ -1,14 +1,14 @@
 package com.hybridweb.core.controller;
 
-import com.hybridweb.core.controller.website.model.WebsiteDefaults;
+import com.hybridweb.core.controller.website.model.WebsiteConfig;
 
 import java.util.List;
 import java.util.Map;
 
 public class Utils {
 
-    public static boolean isEnvEnabled(WebsiteDefaults defaults, String targetEnv) {
-        return defaults.getEnvs().contains(targetEnv);
+    public static boolean isEnvEnabled(WebsiteConfig config, String targetEnv) {
+        return config.getEnvironment(targetEnv) != null;
     }
 
     /**

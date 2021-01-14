@@ -3,8 +3,6 @@ package com.hybridweb.core.controller;
 import com.hybridweb.core.controller.gateway.IngressController;
 import com.hybridweb.core.controller.staticcontent.StaticContentController;
 import com.hybridweb.core.controller.website.model.WebsiteConfig;
-import io.fabric8.kubernetes.api.model.Namespace;
-import io.fabric8.kubernetes.api.model.NamespaceBuilder;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.ServiceAccountBuilder;
 import io.fabric8.kubernetes.api.model.rbac.*;
@@ -15,7 +13,6 @@ import org.jboss.logging.Logger;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.net.MalformedURLException;
-import java.util.List;
 import java.util.Optional;
 
 @ApplicationScoped
@@ -37,21 +34,17 @@ public class MainController {
 
     String nameSpaceLabelValue = "openhybridweb";
 
-    public void createNamespaces(String prefix, List<String> envs) {
-        for (String env : envs) {
-            String name = getNameSpaceName(prefix, env);
-            Namespace ns = new NamespaceBuilder().withNewMetadata().withName(name).addToLabels("app", nameSpaceLabelValue).endMetadata().build();
-            client.namespaces().withName(name).createOrReplace(ns);
-            log.infof("Namespace created. name=%s", name);
-        }
-    }
-
-    public String getNameSpaceName(String namespacePrefix, String env) {
-        return namespacePrefix + env;
-    }
+//    public void createNamespaces(String prefix, List<String> envs) {
+//        for (String env : envs) {
+//            String name = getNameSpaceName(prefix, env);
+//            Namespace ns = new NamespaceBuilder().withNewMetadata().withName(name).addToLabels("app", nameSpaceLabelValue).endMetadata().build();
+//            client.namespaces().withName(name).createOrReplace(ns);
+//            log.infof("Namespace created. name=%s", name);
+//        }
+//    }
 
     public void setupCoreServices(String env, WebsiteConfig config) throws MalformedURLException {
-        String namespace = getNameSpaceName(config.getDefaults().getNamespacePrefix(), env);
+        String namespace = config.getEnvironment(env).getNamespace();
         staticContentController.updateConfigSecret(env, namespace, config);
         staticContentController.deploy(namespace);
 
@@ -96,7 +89,7 @@ public class MainController {
 
     public void redeploy(String env, WebsiteConfig config) throws MalformedURLException {
         log.infof("Redeploying website config, env=%s", env);
-        String namespace = getNameSpaceName(config.getDefaults().getNamespacePrefix(), env);
+        String namespace = config.getEnvironment(env).getNamespace();
         staticContentController.updateConfigSecret(env, namespace, config);
         staticContentController.redeploy(namespace);
         // TODO: Wait till deployment is ready

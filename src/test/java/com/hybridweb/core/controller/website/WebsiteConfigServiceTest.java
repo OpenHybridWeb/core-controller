@@ -16,7 +16,9 @@ class WebsiteConfigServiceTest {
         WebsiteConfig config = WebsiteConfigService.loadYaml(is);
         is.close();
 
-        assertEquals(3, config.getDefaults().getEnvs().size());
+        assertEquals(3, config.getEnvs().size());
+        assertEquals("ns-1", config.getEnvironment("dev").getNamespace());
+
         assertEquals(2, config.getComponents().size());
         assertEquals("/test1", config.getComponents().get(0).getContext());
     }

@@ -3,7 +3,6 @@ package com.hybridweb.core.controller.website;
 import com.hybridweb.core.controller.MainController;
 import com.hybridweb.core.controller.website.model.WebsiteConfig;
 import io.quarkus.runtime.StartupEvent;
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.PullResult;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -19,7 +18,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
 import java.util.Optional;
 
 @ApplicationScoped
@@ -60,14 +58,14 @@ public class WebsiteConfigService {
             config = loadYaml(is);
         }
 
-        List<String> envs = config.getDefaults().getEnvs();
         if (env.isEmpty()) {
-            log.info("ENV is not defined. Going to create appropriate namespaces (like operator)");
-            String prefix = StringUtils.trimToEmpty(config.getDefaults().getNamespacePrefix());
-            mainController.createNamespaces(prefix, envs);
-            for (String e : envs) {
-                mainController.setupCoreServices(e, config);
-            }
+//            List<String> envs = config.getDefaults().getEnvs();
+//            log.info("ENV is not defined. Going to create appropriate namespaces (like operator)");
+//            String prefix = StringUtils.trimToEmpty(config.getDefaults().getNamespacePrefix());
+//            mainController.createNamespaces(prefix, envs);
+//            for (String e : envs) {
+//                mainController.setupCoreServices(e, config);
+//            }
         } else {
             mainController.setupCoreServices(env.get(), config);
         }
