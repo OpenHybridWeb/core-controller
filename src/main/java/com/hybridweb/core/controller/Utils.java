@@ -8,11 +8,11 @@ import java.util.Map;
 public class Utils {
 
     public static boolean isEnvEnabled(WebsiteConfig config, String targetEnv) {
-        return config.getEnvironment(targetEnv) != null;
+        return config.getEnvs().containsKey(targetEnv);
     }
 
     /**
-     * Check if envrionment is included in "spec.envs" array.
+     * Check if environment is included in "spec.envs" array.
      *
      * @param envs
      * @param targetEnv

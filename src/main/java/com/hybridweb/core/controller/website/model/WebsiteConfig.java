@@ -3,13 +3,14 @@ package com.hybridweb.core.controller.website.model;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 
 import java.util.List;
+import java.util.Map;
 
 @RegisterForReflection
 public class WebsiteConfig {
 
     String apiVersion;
 
-    List<Environment> envs;
+    Map<String, Environment> envs;
 
     List<ComponentConfig> components;
 
@@ -29,20 +30,15 @@ public class WebsiteConfig {
         this.components = components;
     }
 
-    public List<Environment> getEnvs() {
+    public Map<String, Environment> getEnvs() {
         return envs;
     }
 
-    public void setEnvs(List<Environment> envs) {
+    public void setEnvs(Map<String, Environment> envs) {
         this.envs = envs;
     }
 
     public Environment getEnvironment(String envName) {
-        for (Environment env : getEnvs()) {
-            if (env.getName().equals(envName)) {
-                return env;
-            }
-        }
-        return null;
+        return envs.get(envName);
     }
 }

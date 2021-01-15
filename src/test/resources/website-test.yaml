@@ -1,11 +1,11 @@
 apiVersion: 1
 
 envs:
-  - name: "dev"
+  dev:
     namespace: ns-1
-  - name: "stage"
+  stage:
     namespace: ns-2
-  - name: "prod"
+  prod:
     namespace: ns-3
 
 components:
