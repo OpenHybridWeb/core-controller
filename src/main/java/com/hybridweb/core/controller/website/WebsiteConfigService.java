@@ -102,7 +102,7 @@ public class WebsiteConfigService {
 
         Map<String, Environment> envs = config.getEnvs();
         for (Map.Entry<String, Environment> envEntry : envs.entrySet()) {
-            if (!namespace.isEmpty() && !namespace.equals(envEntry.getValue().getNamespace())) {
+            if (!namespace.isEmpty() && !envEntry.getValue().getNamespace().equals(namespace.get())) {
                 log.infof("namespace ignored name=%s", namespace);
                 continue;
             }
