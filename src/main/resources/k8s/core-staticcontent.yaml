@@ -1,107 +1,121 @@
-apiVersion: v1
-kind: Service
+kind: "Template"
+apiVersion: "v1"
 metadata:
-  name: core-staticcontent
-  labels:
-    app: core-staticcontent
-spec:
-  type: NodePort
-  ports:
-    # Expose main container
-    - port: 80
-      targetPort: 8080
-      name: http
-    # Expose rest api
-    - port: 8090
-      name: http-api
-  selector:
-    app: core-staticcontent
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: core-staticcontent
-spec:
-  selector:
-    matchLabels:
-      app: core-staticcontent
-  replicas: 1
-  template:
+  name: "website-static"
+labels:
+  template: "website-static"
+parameters:
+  - name: "ENV"
+    description: "Environment"
+    required: true
+
+objects:
+  - kind: Service
+    apiVersion: v1
     metadata:
+      name: static-${ENV}
       labels:
-        app: core-staticcontent
+        app: website
     spec:
-      initContainers:
-        # Init data
-        - name: init-content
-          image: openhybridweb/core-staticcontent
-          command: [ 'node', 'init-content.js' ]
-          env:
-            - name: CONFIG_PATH
-              value: "/app/config/core-staticcontent-config.yaml"
-            - name: TARGET_DIR
-              value: "/app/data/"
-          volumeMounts:
-            - mountPath: "/app/config/"
-              name: secret-config
-              readOnly: true
-            - mountPath: "/app/data/"
-              name: data
-      containers:
-        # Main container to serve data
-        - name: main-container
-          image: "spaship/httpd"
-          resources:
-            requests:
-              cpu: 100m
-              memory: 100Mi
-          ports:
-            - containerPort: 8080
-          volumeMounts:
-            # ROOT context - Make available only _root component
-            - mountPath: "/var/www/html/"
-              name: data
-              subPath: _root
-            # Other components outside root and available via Aliases
-            - mountPath: "/var/www/components/"
-              name: data
-            - mountPath: "/etc/httpd/conf.d/custom/"
-              name: secret-config-httpd
-        # Side car container providing API
-        - name: core-staticcontent-api
-          image: "openhybridweb/core-staticcontent:latest"
-          livenessProbe:
-            httpGet:
-              path: "/"
-              port: 8090
-            initialDelaySeconds: 5
-            failureThreshold: 10
-            periodSeconds: 5
-          readinessProbe:
-            httpGet:
-              path: "/"
-              port: 8090
-            initialDelaySeconds: 5
-            failureThreshold: 5
-            periodSeconds: 5
-          resources:
-            requests:
-              cpu: 100m
-              memory: 100Mi
-          ports:
-            - containerPort: 8090
-          env:
-            - name: DATA_DIR
-              value: "/app/data/"
-          volumeMounts:
-            - mountPath: "/app/data/"
-              name: data
-      volumes:
-        - name: secret-config
-          secret:
-            secretName: core-staticcontent-config
-        - name: secret-config-httpd
-          secret:
-            secretName: core-staticcontent-config-httpd
-        - name: data
-          emptyDir: { }
+#      type: NodePort
+      ports:
+        # Expose main container
+        - port: 80
+          targetPort: 8080
+          name: http
+        # Expose rest api
+        - port: 8090
+          name: http-api
+      selector:
+        app: static-${ENV}
+
+  - kind: Deployment
+    apiVersion: apps/v1
+    metadata:
+      name: static-${ENV}
+    spec:
+      selector:
+        matchLabels:
+          app: static-${ENV}
+      replicas: 1
+      template:
+        metadata:
+          labels:
+            app: static-${ENV}
+        spec:
+          initContainers:
+            # Init data
+            - name: init-content
+              image: openhybridweb/core-staticcontent
+              imagePullPolicy: IfNotPresent
+              command: [ 'node', 'init-content.js' ]
+              env:
+                - name: CONFIG_PATH
+                  value: "/app/config/core-staticcontent-config.yaml"
+                - name: TARGET_DIR
+                  value: "/app/data/"
+              volumeMounts:
+                - mountPath: "/app/config/"
+                  name: static-config
+                  readOnly: true
+                - mountPath: "/app/data/"
+                  name: data
+          containers:
+            # Main container to serve data
+            - name: main-container
+              image: "spaship/httpd"
+              imagePullPolicy: IfNotPresent
+              resources:
+                requests:
+                  cpu: 100m
+                  memory: 100Mi
+              ports:
+                - containerPort: 8080
+              volumeMounts:
+                # ROOT context - Make available only _root component
+                - mountPath: "/var/www/html/"
+                  name: data
+                  subPath: _root
+                # Other components outside root and available via Aliases
+                - mountPath: "/var/www/components/"
+                  name: data
+                - mountPath: "/etc/httpd/conf.d/custom/"
+                  name: static-config-httpd
+            # Side car container providing API
+            - name: core-staticcontent-api
+              image: "openhybridweb/core-staticcontent:latest"
+              livenessProbe:
+                httpGet:
+                  path: "/"
+                  port: 8090
+                initialDelaySeconds: 5
+                failureThreshold: 10
+                periodSeconds: 5
+              readinessProbe:
+                httpGet:
+                  path: "/"
+                  port: 8090
+                initialDelaySeconds: 5
+                failureThreshold: 5
+                periodSeconds: 5
+              resources:
+                requests:
+                  cpu: 100m
+                  memory: 100Mi
+              ports:
+                - containerPort: 8090
+              env:
+                - name: DATA_DIR
+                  value: "/app/data/"
+              volumeMounts:
+                - mountPath: "/app/data/"
+                  name: data
+          volumes:
+            - name: static-config
+              secret:
+                secretName: static-config-${ENV}
+            - name: static-config-httpd
+              secret:
+                secretName: static-config-httpd-${ENV}
+            - name: data
+              emptyDir: { }

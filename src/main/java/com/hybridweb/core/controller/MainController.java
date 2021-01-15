@@ -49,8 +49,8 @@ public class MainController {
 
     public void setupCoreServices(String env, WebsiteConfig config) throws MalformedURLException {
         String namespace = config.getEnvironment(env).getNamespace();
-        staticContentController.updateConfigSecret(env, namespace, config);
-        staticContentController.deploy(namespace);
+        staticContentController.updateConfigs(env, namespace, config);
+        staticContentController.deploy(env, namespace);
 
 //        ingressController.updateIngress(env, namespace, config);
 //        routerController.updateWebsiteRoutes(env, namespace, config);
@@ -95,7 +95,7 @@ public class MainController {
     public void redeploy(String env, WebsiteConfig config) throws MalformedURLException {
         log.infof("Redeploying website config, env=%s", env);
         String namespace = config.getEnvironment(env).getNamespace();
-        staticContentController.updateConfigSecret(env, namespace, config);
+        staticContentController.updateConfigs(env, namespace, config);
         staticContentController.redeploy(namespace);
         // TODO: Wait till deployment is ready
 

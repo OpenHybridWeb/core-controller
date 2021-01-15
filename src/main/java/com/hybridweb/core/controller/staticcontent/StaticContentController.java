@@ -4,8 +4,9 @@ import com.hybridweb.core.controller.Utils;
 import com.hybridweb.core.controller.website.model.ComponentConfig;
 import com.hybridweb.core.controller.website.model.ComponentSpec;
 import com.hybridweb.core.controller.website.model.WebsiteConfig;
-import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
-import io.fabric8.kubernetes.api.model.SecretBuilder;
+import io.fabric8.kubernetes.api.model.*;
+import io.fabric8.kubernetes.api.model.apps.Deployment;
+import io.fabric8.openshift.api.model.Template;
 import io.fabric8.openshift.client.DefaultOpenShiftClient;
 import io.quarkus.runtime.StartupEvent;
 import io.smallrye.mutiny.Uni;
@@ -21,7 +22,6 @@ import org.yaml.snakeyaml.Yaml;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,8 +30,8 @@ public class StaticContentController {
 
     private static final Logger log = Logger.getLogger(StaticContentController.class);
 
-    static final String STATIC_CONFIG_NAME = "core-staticcontent-config";
-    static final String STATIC_CONFIG_HTTPD_NAME = "core-staticcontent-config-httpd";
+    static final String STATIC_CONFIG_NAME = "static-config-";
+    static final String STATIC_CONFIG_HTTPD_NAME = "static-config-httpd-";
 
     @Inject
     DefaultOpenShiftClient client;
@@ -117,43 +117,72 @@ public class StaticContentController {
         return (String) env.get("branch");
     }
 
-    public void updateConfigSecret(String env, String namespace, WebsiteConfig websiteConfig) {
+    public void updateConfigs(String env, String namespace, WebsiteConfig websiteConfig) {
         StaticContentConfig config = createConfig(env, websiteConfig);
         String data = new Yaml().dumpAsMap(config);
-        updateConfigSecret(namespace, data);
+        updateConfigSecret(env, namespace, data);
 
         String aliases = createAliases(env, websiteConfig).toString();
-        updateConfigHttpdSecret(namespace, aliases);
+        updateConfigHttpdSecret(env, namespace, aliases);
     }
 
-    public void updateConfigSecret(String namespace, String secretData) {
-        log.infof("Update core-staticcontent-config secret in namespace=%s\n%s", namespace, secretData);
+    public void updateConfigSecret(String env, String namespace, String secretData) {
+        String name = STATIC_CONFIG_NAME + env;
+        log.infof("Update static-config in namespace=%s, name=%s\n%s", namespace, name, secretData);
+
         Map<String, String> data = new HashMap<>();
         data.put("core-staticcontent-config.yaml", secretData);
 
         SecretBuilder config = new SecretBuilder()
-                .withMetadata(new ObjectMetaBuilder().withName(STATIC_CONFIG_NAME).build())
+                .withMetadata(new ObjectMetaBuilder().withName(name).build())
                 .withStringData(data);
         client.inNamespace(namespace).secrets().createOrReplace(config.build());
     }
 
-    public void updateConfigHttpdSecret(String namespace, String aliasesData) {
-        log.infof("Update core-staticcontent-config-httpd secret in namespace=%s\n%s", namespace, aliasesData);
+    public void updateConfigHttpdSecret(String env, String namespace, String aliasesData) {
+        String name = STATIC_CONFIG_HTTPD_NAME + env;
+        log.infof("Update static-config-httpd in namespace=%s, name=%s\n%s", namespace, name, aliasesData);
+
         Map<String, String> dataAlias = new HashMap<>();
         dataAlias.put("aliases.conf", aliasesData);
 
         SecretBuilder configAlias = new SecretBuilder()
-                .withMetadata(new ObjectMetaBuilder().withName(STATIC_CONFIG_HTTPD_NAME).build())
+                .withMetadata(new ObjectMetaBuilder().withName(name).build())
                 .withStringData(dataAlias);
         client.inNamespace(namespace).secrets().createOrReplace(configAlias.build());
     }
 
 
-    public void deploy(String namespace) {
-        InputStream service = StaticContentController.class.getResourceAsStream("/k8s/core-staticcontent.yaml");
-        client.inNamespace(namespace).load(service).createOrReplace();
+    public void deploy(String env, String namespace) {
+        final Template serverUploadedTemplate = client.templates()
+                .inNamespace(namespace)
+                .load(StaticContentController.class.getResourceAsStream("/k8s/core-staticcontent.yaml"))
+                .createOrReplace();
+        String templateName = serverUploadedTemplate.getMetadata().getName();
+        log.infof("Template %s successfully created on server, namespace=%s", serverUploadedTemplate.getMetadata().getName(), namespace);
 
-        log.info("core-staticcontent deployed");
+        Map<String, String> params = new HashMap<>();
+        params.put("ENV", env);
+
+        KubernetesList result = client.templates()
+                .inNamespace(namespace).withName(templateName)
+                .process(params);
+
+        log.debugf("Template %s successfully processed to list with %s items",
+                result.getItems().get(0).getMetadata().getName(),
+                result.getItems().size());
+
+        for (HasMetadata item : result.getItems()) {
+            log.infof("Deploying kind=%s name=%s", item.getKind(), item.getMetadata().getName());
+            // see https://www.javatips.net/api/fabric8-master/components/kubernetes-api/src/main/java/io/fabric8/kubernetes/api/Controller.java#
+            if (item instanceof Service) {
+                client.inNamespace(namespace).services().createOrReplace((Service) item);
+            }
+            if (item instanceof Deployment) {
+                client.inNamespace(namespace).apps().deployments().createOrReplace((Deployment) item);
+            }
+
+        }
     }
 
     public void redeploy(String namespace) {
