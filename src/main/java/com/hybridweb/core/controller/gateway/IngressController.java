@@ -8,7 +8,6 @@ import io.fabric8.kubernetes.api.model.IntOrString;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.networking.v1beta1.*;
 import io.fabric8.openshift.client.DefaultOpenShiftClient;
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
 
@@ -49,12 +48,8 @@ public class IngressController {
             }
             String routeContext = c.getContext();
             String url;
-            String targetContext = c.getSpec().getTargetContext();
             if (c.isKindGit()) {
                 url = staticContentUrl;
-                if (StringUtils.isEmpty(targetContext) && StringUtils.equals("/", c.getContext())) {
-                    targetContext = rootContext;
-                }
             } else if (c.isKindService()) {
                 url = c.getSpec().getUrl();
             } else {

@@ -6,6 +6,7 @@ import com.hybridweb.core.controller.website.model.ComponentSpec;
 import com.hybridweb.core.controller.website.model.WebsiteConfig;
 import io.fabric8.kubernetes.api.model.*;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
+import io.fabric8.openshift.api.model.Route;
 import io.fabric8.openshift.api.model.Template;
 import io.fabric8.openshift.client.DefaultOpenShiftClient;
 import io.quarkus.runtime.StartupEvent;
@@ -179,7 +180,11 @@ public class StaticContentController {
                 client.inNamespace(namespace).services().createOrReplace((Service) item);
             }
             if (item instanceof Deployment) {
+                // Intentionally createOrReplace
                 client.inNamespace(namespace).apps().deployments().createOrReplace((Deployment) item);
+            }
+            if (item instanceof Route) {
+                client.inNamespace(namespace).routes().createOrReplace((Route) item);
             }
 
         }

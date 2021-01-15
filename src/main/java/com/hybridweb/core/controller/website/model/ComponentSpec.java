@@ -8,7 +8,10 @@ import java.util.Map;
 public class ComponentSpec {
     String url;
     String dir;
-    String targetContext;
+
+    String serviceName;
+    String targetPort;
+
     Map<String, Map<String, Object>> envs;
 
     public String getUrl() {
@@ -27,12 +30,20 @@ public class ComponentSpec {
         this.dir = dir;
     }
 
-    public String getTargetContext() {
-        return targetContext;
+    public String getServiceName() {
+        return serviceName;
     }
 
-    public void setTargetContext(String targetContext) {
-        this.targetContext = targetContext;
+    public void setServiceName(String serviceName) {
+        this.serviceName = serviceName;
+    }
+
+    public String getTargetPort() {
+        return targetPort;
+    }
+
+    public void setTargetPort(String targetPort) {
+        this.targetPort = targetPort;
     }
 
     public Map<String, Map<String, Object>> getEnvs() {

@@ -28,6 +28,20 @@ objects:
           name: http-api
       selector:
         app: static-${ENV}
+  - kind: Route
+    apiVersion: route.openshift.io/v1
+    metadata:
+      name: static-api
+    spec:
+      port:
+        targetPort: 8090
+      tls:
+        termination: edge
+      to:
+        kind: Service
+        name: static-${ENV}
+        weight: 100
+      wildcardPolicy: None
 
   - kind: Deployment
     apiVersion: apps/v1

@@ -53,7 +53,7 @@ public class MainController {
         staticContentController.deploy(env, namespace);
 
 //        ingressController.updateIngress(env, namespace, config);
-//        routerController.updateWebsiteRoutes(env, namespace, config);
+        routerController.updateWebsiteRoutes(env, namespace, config);
     }
 
     public void updateServiceAccount(String namespace) {
@@ -100,6 +100,6 @@ public class MainController {
         // TODO: Wait till deployment is ready
 
 //        ingressController.updateIngress(env, namespace, config);
-//        routerController.updateWebsiteRoutes(env, namespace, config);
+        routerController.updateWebsiteRoutes(env, namespace, config);
     }
 }

@@ -17,3 +17,8 @@ components:
     kind: git
     spec:
       url: https://github.com/OpenHybridWeb/example-component-homepage.git
+  - context: /test3
+    kind: service
+    spec:
+      serviceName: api
+      targetPort: 80
