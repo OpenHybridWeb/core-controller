@@ -92,7 +92,7 @@ public class MainController {
         log.infof("Redeploying website config, env=%s", env);
         String namespace = config.getEnvironment(env).getNamespace();
         staticContentController.updateConfigs(env, namespace, config);
-        staticContentController.redeploy(namespace);
+        staticContentController.redeploy(env, namespace);
         // TODO: Wait till deployment is ready
 
 //        ingressController.updateIngress(env, namespace, config);

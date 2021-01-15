@@ -190,9 +190,10 @@ public class StaticContentController {
         }
     }
 
-    public void redeploy(String namespace) {
-        client.inNamespace(namespace).apps().deployments().withName("core-staticcontent").rolling().restart();
-        log.info("core-staticcontent redeployed");
+    public void redeploy(String env, String namespace) {
+        String name = "static-" + env;
+        client.inNamespace(namespace).apps().deployments().withName(name).rolling().restart();
+        log.infof("deployment rollout name=%s", name);
     }
 
     public Uni<JsonObject> refreshComponent(String name) {
