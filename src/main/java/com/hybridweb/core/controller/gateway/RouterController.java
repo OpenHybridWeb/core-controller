@@ -56,7 +56,7 @@ public class RouterController {
                     .withSpec(spec.build());
 
             Route route = builder.build();
-            log.infof("route=%s", route);
+            log.infof("Deploying route=%s", route.getMetadata().getName());
 
             client.inNamespace(namespace).routes().createOrReplace(route);
         }
