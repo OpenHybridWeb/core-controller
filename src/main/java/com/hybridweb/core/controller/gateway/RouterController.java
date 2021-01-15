@@ -1,5 +1,6 @@
 package com.hybridweb.core.controller.gateway;
 
+import com.hybridweb.core.controller.Utils;
 import com.hybridweb.core.controller.website.model.ComponentConfig;
 import com.hybridweb.core.controller.website.model.WebsiteConfig;
 import io.fabric8.kubernetes.api.model.IntOrString;
@@ -51,7 +52,7 @@ public class RouterController {
 
             String name = getRouteName(sanityContext, targetEnv);
             RouteBuilder builder = new RouteBuilder()
-                    .withMetadata(new ObjectMetaBuilder().withName(name).build())
+                    .withMetadata(new ObjectMetaBuilder().withName(name).withLabels(Utils.defaultLabels(targetEnv)).build())
                     .withSpec(spec.build());
 
             Route route = builder.build();

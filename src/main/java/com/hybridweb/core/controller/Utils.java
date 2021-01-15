@@ -2,6 +2,7 @@ package com.hybridweb.core.controller;
 
 import com.hybridweb.core.controller.website.model.WebsiteConfig;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class Utils {
@@ -24,5 +25,10 @@ public class Utils {
         return envs.containsKey(targetEnv);
     }
 
+    public static Map<String, String> defaultLabels(String env) {
+        Map<String, String> labels = new HashMap<>();
+        labels.put("env", env);
+        return labels;
+    }
 
 }
