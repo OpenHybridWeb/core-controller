@@ -54,7 +54,7 @@
     <dependencies>
         <dependency>
             <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-kubernetes-client</artifactId>
+            <artifactId>quarkus-openshift-client</artifactId>
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>

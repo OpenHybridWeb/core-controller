@@ -47,7 +47,7 @@ You're done. Visit [http://minikube.info](http://minikube.info)
 
 Just create a namespace and expose minikube api to port 8090
 ```shell
-kubectl create namespace dev
+kubectl create namespace static-restapi-dev
 kubectl proxy --port=8090
 ```
 

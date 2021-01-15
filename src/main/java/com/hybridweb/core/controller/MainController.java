@@ -1,12 +1,13 @@
 package com.hybridweb.core.controller;
 
 import com.hybridweb.core.controller.gateway.IngressController;
+import com.hybridweb.core.controller.gateway.RouterController;
 import com.hybridweb.core.controller.staticcontent.StaticContentController;
 import com.hybridweb.core.controller.website.model.WebsiteConfig;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.ServiceAccountBuilder;
 import io.fabric8.kubernetes.api.model.rbac.*;
-import io.fabric8.kubernetes.client.DefaultKubernetesClient;
+import io.fabric8.openshift.client.DefaultOpenShiftClient;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
 
@@ -30,7 +31,10 @@ public class MainController {
     IngressController ingressController;
 
     @Inject
-    DefaultKubernetesClient client;
+    RouterController routerController;
+
+    @Inject
+    DefaultOpenShiftClient client;
 
     String nameSpaceLabelValue = "openhybridweb";
 
@@ -49,6 +53,7 @@ public class MainController {
         staticContentController.deploy(namespace);
 
 //        ingressController.updateIngress(env, namespace, config);
+//        routerController.updateWebsiteRoutes(env, namespace, config);
     }
 
     public void updateServiceAccount(String namespace) {
@@ -95,5 +100,6 @@ public class MainController {
         // TODO: Wait till deployment is ready
 
 //        ingressController.updateIngress(env, namespace, config);
+//        routerController.updateWebsiteRoutes(env, namespace, config);
     }
 }

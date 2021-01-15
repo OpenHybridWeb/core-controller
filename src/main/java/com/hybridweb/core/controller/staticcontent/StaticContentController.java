@@ -6,7 +6,7 @@ import com.hybridweb.core.controller.website.model.ComponentSpec;
 import com.hybridweb.core.controller.website.model.WebsiteConfig;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.SecretBuilder;
-import io.fabric8.kubernetes.client.DefaultKubernetesClient;
+import io.fabric8.openshift.client.DefaultOpenShiftClient;
 import io.quarkus.runtime.StartupEvent;
 import io.smallrye.mutiny.Uni;
 import io.vertx.core.json.JsonObject;
@@ -34,7 +34,7 @@ public class StaticContentController {
     static final String STATIC_CONFIG_HTTPD_NAME = "core-staticcontent-config-httpd";
 
     @Inject
-    DefaultKubernetesClient client;
+    DefaultOpenShiftClient client;
 
     @Inject
     Vertx vertx;
