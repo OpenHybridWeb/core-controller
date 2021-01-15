@@ -23,7 +23,6 @@ import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import java.io.InputStream;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @ApplicationScoped
@@ -51,7 +50,7 @@ public class StaticContentController {
     @ConfigProperty(name = "app.staticcontent.rootcontext")
     protected String rootContext;
 
-    void onStart(@Observes StartupEvent ev){
+    void onStart(@Observes StartupEvent ev) {
         this.staticContentClient = WebClient.create(vertx, new WebClientOptions()
                 .setDefaultHost(staticContentHost)
                 .setDefaultPort(staticContentApiPort)
@@ -66,7 +65,7 @@ public class StaticContentController {
         }
         for (ComponentConfig c : websiteConfig.getComponents()) {
             ComponentSpec spec = c.getSpec();
-            List<Map<String, Object>> envs = spec.getEnvs();
+            Map<String, Map<String, Object>> envs = spec.getEnvs();
             if (!Utils.isEnvIncluded(envs, targetEnv)) {
                 continue;
             }
@@ -91,8 +90,7 @@ public class StaticContentController {
         }
         for (ComponentConfig c : websiteConfig.getComponents()) {
             ComponentSpec spec = c.getSpec();
-            List<Map<String, Object>> envs = spec.getEnvs();
-            if (!Utils.isEnvIncluded(envs, targetEnv)) {
+            if (!Utils.isEnvIncluded(spec.getEnvs(), targetEnv)) {
                 continue;
             }
 
@@ -101,20 +99,22 @@ public class StaticContentController {
                 if (StringUtils.equals("/", c.getContext())) {
                     continue;
                 }
-                config.append("Alias "+ dir + " /var/www/components" + dir);
+                config.append("Alias " + dir + " /var/www/components" + dir);
             }
         }
         return config;
     }
 
-    public String getRef(List<Map<String, Object>> envs, String targetEnv) {
+    public String getRef(Map<String, Map<String, Object>> envs, String targetEnv) {
         if (envs == null) {
             return targetEnv;
         }
-        for (Map<String, Object> env : envs) {
-            return (String) env.get(targetEnv);
+        Map<String, Object> env = envs.get(targetEnv);
+        if (env == null) {
+            // no override - branch is same as env
+            return targetEnv;
         }
-        return targetEnv;
+        return (String) env.get("branch");
     }
 
     public void updateConfigSecret(String env, String namespace, WebsiteConfig websiteConfig) {

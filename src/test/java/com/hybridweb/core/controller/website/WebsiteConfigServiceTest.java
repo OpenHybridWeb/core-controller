@@ -21,6 +21,7 @@ class WebsiteConfigServiceTest {
 
         assertEquals(2, config.getComponents().size());
         assertEquals("/test1", config.getComponents().get(0).getContext());
+        assertEquals("/test2", config.getComponents().get(1).getContext());
     }
 
 }

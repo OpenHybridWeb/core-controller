@@ -2,7 +2,6 @@ package com.hybridweb.core.controller.website.model;
 
 import io.quarkus.runtime.annotations.RegisterForReflection;
 
-import java.util.List;
 import java.util.Map;
 
 @RegisterForReflection
@@ -10,7 +9,7 @@ public class ComponentSpec {
     String url;
     String dir;
     String targetContext;
-    List<Map<String, Object>> envs;
+    Map<String, Map<String, Object>> envs;
 
     public String getUrl() {
         return url;
@@ -36,11 +35,11 @@ public class ComponentSpec {
         this.targetContext = targetContext;
     }
 
-    public List<Map<String, Object>> getEnvs() {
+    public Map<String, Map<String, Object>> getEnvs() {
         return envs;
     }
 
-    public void setEnvs(List<Map<String, Object>> envs) {
+    public void setEnvs(Map<String, Map<String, Object>> envs) {
         this.envs = envs;
     }
 }

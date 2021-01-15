@@ -44,8 +44,7 @@ public class IngressController {
         List<HTTPIngressPath> paths = new ArrayList<>();
         for (ComponentConfig c : config.getComponents()) {
             ComponentSpec spec = c.getSpec();
-            List<Map<String, Object>> envs = spec.getEnvs();
-            if (!Utils.isEnvIncluded(envs, targetEnv)) {
+            if (!Utils.isEnvIncluded(spec.getEnvs(), targetEnv)) {
                 continue;
             }
             String routeContext = c.getContext();
