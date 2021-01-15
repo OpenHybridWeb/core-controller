@@ -1,6 +1,7 @@
 package com.hybridweb.core.controller.website;
 
 import com.hybridweb.core.controller.MainController;
+import com.hybridweb.core.controller.website.model.Environment;
 import com.hybridweb.core.controller.website.model.WebsiteConfig;
 import io.quarkus.runtime.StartupEvent;
 import org.eclipse.jgit.api.Git;
@@ -18,6 +19,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map;
 import java.util.Optional;
 
 @ApplicationScoped
@@ -28,8 +30,8 @@ public class WebsiteConfigService {
     @ConfigProperty(name = "app.controller.website.url")
     String gitUrl;
 
-    @ConfigProperty(name = "app.controller.env")
-    protected Optional<String> env;
+    @ConfigProperty(name = "app.controller.namespace")
+    protected Optional<String> namespace;
 
     String workDir = System.getProperty("user.dir");
 
@@ -58,16 +60,14 @@ public class WebsiteConfigService {
             config = loadYaml(is);
         }
 
-        if (env.isEmpty()) {
-//            List<String> envs = config.getDefaults().getEnvs();
-//            log.info("ENV is not defined. Going to create appropriate namespaces (like operator)");
-//            String prefix = StringUtils.trimToEmpty(config.getDefaults().getNamespacePrefix());
-//            mainController.createNamespaces(prefix, envs);
-//            for (String e : envs) {
-//                mainController.setupCoreServices(e, config);
-//            }
-        } else {
-            mainController.setupCoreServices(env.get(), config);
+        Map<String, Environment> envs = config.getEnvs();
+        for (Map.Entry<String, Environment> envEntry : envs.entrySet()) {
+            if (!namespace.isEmpty() && !envEntry.getValue().getNamespace().equals(namespace.get())) {
+                log.infof("namespace ignored name=%s", namespace);
+                continue;
+            }
+            // ? create namespace ???
+            mainController.setupCoreServices(envEntry.getKey(), config);
         }
     }
 
@@ -99,7 +99,14 @@ public class WebsiteConfigService {
         }
 
         // TODO: Check if any change happens. If not skip redeploy
-        mainController.redeploy(env.get(), config);
 
+        Map<String, Environment> envs = config.getEnvs();
+        for (Map.Entry<String, Environment> envEntry : envs.entrySet()) {
+            if (!namespace.isEmpty() && !namespace.equals(envEntry.getValue().getNamespace())) {
+                log.infof("namespace ignored name=%s", namespace);
+                continue;
+            }
+            mainController.redeploy(envEntry.getKey(), config);
+        }
     }
 }

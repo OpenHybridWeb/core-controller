@@ -8,21 +8,16 @@ import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.ServiceAccountBuilder;
 import io.fabric8.kubernetes.api.model.rbac.*;
 import io.fabric8.openshift.client.DefaultOpenShiftClient;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.net.MalformedURLException;
-import java.util.Optional;
 
 @ApplicationScoped
 public class MainController {
 
     private static final Logger log = Logger.getLogger(MainController.class);
-
-    @ConfigProperty(name = "app.controller.namespace.prefix")
-    Optional<String> namespacePrefix;
 
     @Inject
     StaticContentController staticContentController;
@@ -49,6 +44,7 @@ public class MainController {
 
     public void setupCoreServices(String env, WebsiteConfig config) throws MalformedURLException {
         String namespace = config.getEnvironment(env).getNamespace();
+        log.infof("Create core services env=%s  namespace=%s", env, namespace);
         staticContentController.updateConfigs(env, namespace, config);
         staticContentController.deploy(env, namespace);
 
